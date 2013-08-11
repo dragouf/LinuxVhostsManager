@@ -14,7 +14,7 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <PublishUrl>..\ClickOnce\</PublishUrl>
+    <PublishUrl>E:\Donnees\Dropbox\Public\LinuxVhostManager\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -24,14 +24,14 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>https://raw.github.com/dragouf/LinuxVhostsManager/master/ClickOnce/</InstallUrl>
+    <InstallUrl>https://dl.dropboxusercontent.com/u/8957805/LinuxVhostManager/</InstallUrl>
     <SupportUrl>https://github.com/dragouf/LinuxVhostsManager</SupportUrl>
     <ErrorReportUrl>https://github.com/dragouf/LinuxVhostsManager/issues</ErrorReportUrl>
     <ProductName>Vhost Manager</ProductName>
     <PublisherName>Web Alliance</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationRevision>2</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
