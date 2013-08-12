@@ -48,6 +48,7 @@
             this.linkLabelUnlockHosts = new System.Windows.Forms.LinkLabel();
             this.panelUnlockHost = new System.Windows.Forms.Panel();
             this.linkLabelNetBeans = new System.Windows.Forms.LinkLabel();
+            this.linkLabelLog = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxHostsWarn)).BeginInit();
             this.panelUnlockHost.SuspendLayout();
             this.SuspendLayout();
@@ -249,7 +250,7 @@
             // 
             this.panelUnlockHost.Controls.Add(this.linkLabelUnlockHosts);
             this.panelUnlockHost.Controls.Add(this.pictureBoxHostsWarn);
-            this.panelUnlockHost.Location = new System.Drawing.Point(396, 46);
+            this.panelUnlockHost.Location = new System.Drawing.Point(436, 50);
             this.panelUnlockHost.Name = "panelUnlockHost";
             this.panelUnlockHost.Size = new System.Drawing.Size(170, 22);
             this.panelUnlockHost.TabIndex = 19;
@@ -266,10 +267,22 @@
             this.linkLabelNetBeans.Text = "Créer/Ouvrir le projet";
             this.linkLabelNetBeans.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelNetBeans_LinkClicked);
             // 
+            // linkLabelLog
+            // 
+            this.linkLabelLog.AutoSize = true;
+            this.linkLabelLog.Location = new System.Drawing.Point(391, 52);
+            this.linkLabelLog.Name = "linkLabelLog";
+            this.linkLabelLog.Size = new System.Drawing.Size(30, 13);
+            this.linkLabelLog.TabIndex = 21;
+            this.linkLabelLog.TabStop = true;
+            this.linkLabelLog.Text = "Logs";
+            this.linkLabelLog.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelLog_LinkClicked);
+            // 
             // VhostTab
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.linkLabelLog);
             this.Controls.Add(this.linkLabelNetBeans);
             this.Controls.Add(this.panelUnlockHost);
             this.Controls.Add(this.labelErreur);
@@ -320,5 +333,6 @@
         private System.Windows.Forms.LinkLabel linkLabelUnlockHosts;
         private System.Windows.Forms.Panel panelUnlockHost;
         private System.Windows.Forms.LinkLabel linkLabelNetBeans;
+        private System.Windows.Forms.LinkLabel linkLabelLog;
     }
 }

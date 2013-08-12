@@ -64,9 +64,13 @@ EOF", cheminVhost).Replace("\r\n", "\n"));
                 Order allow,deny
                 allow from all
         </Directory>
-        ErrorLog {1}/logs/error.log.
-        LogLevel warn
+        ErrorLog {1}/logs/error.log
         CustomLog {1}/logs/access.log combined
+        RewriteLog {1}/logs/rewrite.log
+        RewriteLogLevel 3
+        php_flag log_errors on
+        php_flag display_errors on
+        php_value error_reporting 30719
 </VirtualHost>
 EOF", vhost.Nom, cheminVhost, serverAliases.ToFlatString()).Replace("\r\n", "\n"));
 

@@ -108,6 +108,8 @@ namespace VhostManager
 
         private SyncManager SyncManagerVhost { get; set; }
 
+        private FormLogs LogsForm { get; set; }
+
         public VhostTab(VhostDetails vhostDetails, ConnectionInfo sshInfo, string sshPassword, FormMain parentForm)
         {
             InitializeComponent();
@@ -678,6 +680,16 @@ namespace VhostManager
             {
                 MessageBox.Show(this, "NetBeans ne semble pas etre installé.", "NetBeans introuvable...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        private void linkLabelLog_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (this.LogsForm == null || this.LogsForm.IsDisposed)
+                this.LogsForm = new FormLogs(this.VhostInfo.Nom, this.SSHConnectionInfos);
+            
+            this.LogsForm.Show();
+            this.LogsForm.StartPosition = FormStartPosition.CenterScreen;
+            this.LogsForm.BringToFront();
         }
     }
 }
