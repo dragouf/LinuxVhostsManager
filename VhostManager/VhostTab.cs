@@ -606,7 +606,8 @@ namespace VhostManager
 
         private void linkLabelNetBeans_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string netbeansInstallFolder = string.Empty;
+            string netbeansInstallFolder64 = string.Empty;
+            string netbeansInstallFolder32 = string.Empty;
 
             var userPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string netbeansConfPath = string.Format("{0}\\.nbi\\registry.xml", userPath);
@@ -622,24 +623,33 @@ namespace VhostManager
 
             if (key != null)
             {
-                netbeansInstallFolder = key.Value + @"\bin\netbeans64.exe";
+                netbeansInstallFolder64 = key.Value + @"\bin\netbeans64.exe";
+                netbeansInstallFolder32 = key.Value + @"\bin\netbeans.exe";
             }
 
-            if (!string.IsNullOrEmpty(netbeansInstallFolder))
+            if ((!string.IsNullOrEmpty(netbeansInstallFolder64) || !string.IsNullOrEmpty(netbeansInstallFolder32)) && (File.Exists(netbeansInstallFolder64) || File.Exists(netbeansInstallFolder32)))
             {
-
                 if (!NetbeansProjectManager.IsProjectExist(VhostInfo.CheminLocal))
                 {
                     NetbeansProjectManager.CreateProject(VhostInfo.CheminLocal, VhostInfo.Nom);
                 }
 
-                if (File.Exists(netbeansInstallFolder))
+                if (File.Exists(netbeansInstallFolder64))
                 {
                     Process process = new Process();
-                    process.StartInfo.FileName = netbeansInstallFolder;
+                    process.StartInfo.FileName = netbeansInstallFolder64;
                     process.StartInfo.Arguments = "--open " + VhostInfo.CheminLocal;
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                     process.Start();
+                }
+                else
+                {
+                    Process process = new Process();
+                    process.StartInfo.FileName = netbeansInstallFolder64;
+                    process.StartInfo.Arguments = "--open " + VhostInfo.CheminLocal;
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    process.Start();
+ 
                 }
             }
             else
