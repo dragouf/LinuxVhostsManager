@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -38,7 +37,6 @@
             this.radioButtonDev = new System.Windows.Forms.RadioButton();
             this.labelSync = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.toolTipSync = new System.Windows.Forms.ToolTip(this.components);
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.linkLabelCheminLocal = new System.Windows.Forms.LinkLabel();
@@ -149,10 +147,6 @@
             this.label4.Size = new System.Drawing.Size(91, 13);
             this.label4.TabIndex = 8;
             this.label4.Text = "Chemin Local :";
-            // 
-            // toolTipSync
-            // 
-            this.toolTipSync.ToolTipTitle = "Synchroniser le dossier local avec le vhost...";
             // 
             // label5
             // 
@@ -316,7 +310,6 @@
         private System.Windows.Forms.Label labelSync;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button buttonSync;
-        private System.Windows.Forms.ToolTip toolTipSync;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.LinkLabel linkLabelCheminLocal;

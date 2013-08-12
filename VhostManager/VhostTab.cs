@@ -27,7 +27,30 @@ namespace VhostManager
                 return string.Format(@"\\{0}\vhosts\{1}\httpdocs", this.SSHConnectionInfos.Host, this.VhostInfo.Nom);
             }
         }
-        private bool IsSyncInProgress { get; set; }
+
+        private bool _IsSyncInProgress;
+        private bool IsSyncInProgress
+        {
+            get
+            {
+                return IsSyncInProgress;
+            }
+
+            set
+            {
+                this.buttonSync.Invoke((MethodInvoker)(() =>
+                {
+                    AnimateSyncButton(value);
+                    this.buttonSync.Enabled = !value;
+                    var toolTipSync = new ToolTip();
+                    toolTipSync.ShowAlways = true;
+                    string tipText = value ? "Sync. en cours..." : "Synchroniser le dossier local avec le vhost...";
+                    toolTipSync.SetToolTip(this.buttonSync, tipText);
+                }));
+
+                _IsSyncInProgress = value;
+            }
+        }
 
         private VhostDetails VhostInfo { get; set; }
         private ConnectionInfo SSHConnectionInfos { get; set; }
@@ -92,7 +115,7 @@ namespace VhostManager
             this.VhostInfo = vhostDetails;
             this.SSHConnectionInfos = sshInfo;
             this.ConnexionPassword = sshPassword;
-            toolTipSync.SetToolTip(this.buttonSync, string.Empty);
+            //toolTipSync.SetToolTip(this.buttonSync, string.Empty);
 
             StartLoadingIfValid();
         }
@@ -130,7 +153,7 @@ namespace VhostManager
 
             labelSync.ForeColor = Color.Orange;
             labelSync.Text = string.Format("En cours de calcul...");
-            this.buttonSync.Visible = false;
+            //this.buttonSync.Visible = false;
 
             Microsoft.Synchronization.SyncOperationStatistics statsSync = null;
             var bw = new BackgroundWorker();
@@ -178,8 +201,8 @@ namespace VhostManager
                     this.MainForm.StatusBarLabel.Text = errorMessage.Replace(Environment.NewLine, "");
                 }
 
-                this.buttonSync.Visible = true;
-                toolTipSync.SetToolTip(this.buttonSync, string.Empty);
+                //this.buttonSync.Visible = true;
+                //toolTipSync.SetToolTip(this.buttonSync, string.Empty);
 
                 this.IsSyncInProgress = false;
                 //this.StartWatchLocalFolder();
@@ -201,11 +224,11 @@ namespace VhostManager
                 labelSync.Text = string.Format("En cours de synchronisation...");
             }));
 
-            this.buttonSync.Invoke((MethodInvoker)(() =>
-            {
-                AnimateSyncButton(true);
-                this.buttonSync.Enabled = false;
-            }));
+            //this.buttonSync.Invoke((MethodInvoker)(() =>
+            //{
+            //    AnimateSyncButton(true);
+            //    this.buttonSync.Enabled = false;
+            //}));
 
             var syncDirection = this.MainForm.SyncDirection;
             Microsoft.Synchronization.SyncOperationStatistics statsSync = null;
@@ -249,15 +272,15 @@ namespace VhostManager
                         {
                             labelSync.ForeColor = Color.Green;
                             labelSync.Text = string.Format("Synchronisé!");
-                            toolTipSync.SetToolTip(this.buttonSync, string.Empty);
+                            //toolTipSync.SetToolTip(this.buttonSync, string.Empty);
                         }));
                     }
 
-                    this.buttonSync.Invoke((MethodInvoker)(() =>
-                    {
-                        AnimateSyncButton(false);
-                        this.buttonSync.Enabled = true;
-                    }));
+                    //this.buttonSync.Invoke((MethodInvoker)(() =>
+                    //{
+                    //    AnimateSyncButton(false);
+                    //    this.buttonSync.Enabled = true;
+                    //}));
                 }
                 else
                 {
@@ -448,18 +471,18 @@ namespace VhostManager
                             default:
                                 this.labelSync.Invoke((MethodInvoker)(() =>
                                 {
-                                    this.buttonSync.Visible = true;
+                                    //this.buttonSync.Visible = true;
                                     this.labelSync.ForeColor = Color.Red;
                                     this.labelSync.Text = "Fichiers non synchronisés!";
                                 }));
                                 break;
                         }
                     }
-                    catch 
+                    catch
                     {
                         this.labelSync.Invoke((MethodInvoker)(() =>
                         {
-                            this.buttonSync.Visible = true;
+                            //this.buttonSync.Visible = true;
                             this.labelSync.ForeColor = Color.Red;
                             this.labelSync.Text = "Fichiers non synchronisés!";
                         }));
@@ -521,7 +544,7 @@ namespace VhostManager
             var bw = new BackgroundWorker();
             // DEMARRE
             bw.DoWork += (s, args) =>
-            {                
+            {
                 if (!Directory.Exists(VhostInfo.CheminLocal))
                 {
                     isLocalValid = false;
@@ -648,7 +671,7 @@ namespace VhostManager
                     process.StartInfo.Arguments = string.Format(@"--open ""{0}""", VhostInfo.CheminLocal);
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                     process.Start();
- 
+
                 }
             }
             else
