@@ -113,12 +113,16 @@ namespace VhostManager
             // Etat de synchronisation
             this.CheckSync();
             
+            // Verifie l'acces au fichier hosts
+            if (!HostsFileManager.HasAcces())
+                this.panelUnlockHost.Visible = true;
         }
 
         private void CheckSync()
         {
             this.IsSyncInProgress = true;
             //this.StoptWatchLocalFolder();
+            string errorMessage = string.Empty;
 
             labelSync.ForeColor = Color.Orange;
             labelSync.Text = string.Format("En cours de calcul...");
@@ -132,28 +136,43 @@ namespace VhostManager
             // DEMARRE
             bw.DoWork += (s, args) =>
             {
-                statsSync = SyncManager.DetectChanges(
-                    this.VhostInfo.CheminLocal,
-                    this.VhostInfo.Nom,
-                    this.SSHConnectionInfos.Host,
-                    this.SSHConnectionInfos.Username,
-                    this.ConnexionPassword,
-                    syncDirection);
+                try
+                {
+                    statsSync = SyncManager.DetectChanges(
+                        this.VhostInfo.CheminLocal,
+                        this.VhostInfo.Nom,
+                        this.SSHConnectionInfos.Host,
+                        this.SSHConnectionInfos.Username,
+                        this.ConnexionPassword,
+                        syncDirection);
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = ex.Message;
+                }
             };
 
             // TERMINE
             bw.RunWorkerCompleted += (s, args) =>
             {
-                int nombreChangements = statsSync.UploadChangesTotal;
-                if (nombreChangements > 0)
+                if (statsSync != null)
                 {
-                    labelSync.ForeColor = Color.Red;
-                    labelSync.Text = string.Format("{0} fichiers à synchroniser!", nombreChangements);
+                    int nombreChangements = statsSync.UploadChangesTotal;
+                    if (nombreChangements > 0)
+                    {
+                        labelSync.ForeColor = Color.Red;
+                        labelSync.Text = string.Format("{0} fichiers à synchroniser!", nombreChangements);
+                    }
+                    else
+                    {
+                        labelSync.ForeColor = Color.Green;
+                        labelSync.Text = string.Format("Synchronisé!");
+                    }
                 }
                 else
                 {
-                    labelSync.ForeColor = Color.Green;
-                    labelSync.Text = string.Format("Synchronisé!");
+                    this.MainForm.StatusBarLabel.ForeColor = Color.Red;
+                    this.MainForm.StatusBarLabel.Text = errorMessage.Replace(Environment.NewLine, "");
                 }
 
                 this.buttonSync.Visible = true;
@@ -171,6 +190,7 @@ namespace VhostManager
         {
             this.IsSyncInProgress = true;
             //this.StoptWatchLocalFolder();
+            string errorMessage = string.Empty;
 
             this.labelSync.Invoke((MethodInvoker)(() => {
                 labelSync.ForeColor = Color.Orange;
@@ -191,39 +211,57 @@ namespace VhostManager
             // DEMARRE
             bw.DoWork += (s, args) =>
             {
-                statsSync = SyncManager.Synchronize(
-                    this.VhostInfo.CheminLocal,
-                    this.VhostInfo.Nom,
-                    this.SSHConnectionInfos.Host,
-                    this.SSHConnectionInfos.Username,
-                    this.ConnexionPassword,
-                    syncDirection);
+                try
+                {
+                    statsSync = SyncManager.Synchronize(
+                        this.VhostInfo.CheminLocal,
+                        this.VhostInfo.Nom,
+                        this.SSHConnectionInfos.Host,
+                        this.SSHConnectionInfos.Username,
+                        this.ConnexionPassword,
+                        syncDirection);
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = ex.Message;
+                }
             };
 
             // TERMINE
             bw.RunWorkerCompleted += (s, args) =>
             {
-                int nombreChangements = statsSync.UploadChangesFailed;
-                if (nombreChangements > 0)
+                if (statsSync != null)
                 {
-                    this.labelSync.Invoke((MethodInvoker)(() => {
-                        labelSync.ForeColor = Color.Red;
-                        labelSync.Text = string.Format("{0} fichiers non synchronisé!", nombreChangements);
+                    int nombreChangements = statsSync.UploadChangesFailed;
+                    if (nombreChangements > 0)
+                    {
+                        this.labelSync.Invoke((MethodInvoker)(() =>
+                        {
+                            labelSync.ForeColor = Color.Red;
+                            labelSync.Text = string.Format("{0} fichiers non synchronisé!", nombreChangements);
+                        }));
+                    }
+                    else
+                    {
+                        this.labelSync.Invoke((MethodInvoker)(() =>
+                        {
+                            labelSync.ForeColor = Color.Green;
+                            labelSync.Text = string.Format("Synchronisé!");
+                            toolTipSync.SetToolTip(this.buttonSync, string.Empty);
+                        }));
+                    }
+
+                    this.buttonSync.Invoke((MethodInvoker)(() =>
+                    {
+                        AnimateSyncButton(false);
+                        this.buttonSync.Enabled = true;
                     }));
                 }
                 else
                 {
-                    this.labelSync.Invoke((MethodInvoker)(() => {
-                        labelSync.ForeColor = Color.Green;
-                        labelSync.Text = string.Format("Synchronisé!");
-                        toolTipSync.SetToolTip(this.buttonSync, string.Empty);
-                    }));
+                    this.MainForm.StatusBarLabel.ForeColor = Color.Red;
+                    this.MainForm.StatusBarLabel.Text = errorMessage.Replace(Environment.NewLine, "");
                 }
-
-                this.buttonSync.Invoke((MethodInvoker)(() => {
-                    AnimateSyncButton(false);
-                    this.buttonSync.Enabled = true;
-                }));
                 
 
                 this.IsSyncInProgress = false;
@@ -257,8 +295,19 @@ namespace VhostManager
             // DEMARRE
             bw.DoWork += (s, args) =>
             {
-                VhostsFileManager.DeleteVhosts(this.VhostInfo.Nom, this.SSHConnectionInfos);
-                HostsFileManager.DeleteHostName(this.VhostInfo.Nom);
+                try
+                {
+                    VhostsFileManager.DeleteVhosts(this.VhostInfo.Nom, this.SSHConnectionInfos);
+                    HostsFileManager.DeleteHostName(this.VhostInfo.Nom);
+                }
+                catch (Exception ve)
+                {
+                    this.MainForm.Invoke((MethodInvoker)(() =>
+                    {
+                        this.MainForm.StatusBarLabel.ForeColor = Color.Red;
+                        this.MainForm.StatusBarLabel.Text = ve.Message;
+                    }));
+                }
             };
 
             // TERMINE
@@ -296,11 +345,27 @@ namespace VhostManager
                     }
                 }
 
-                HostsFileManager.AddHostName(this.VhostInfo.Nom, this.VhostInfo.SousDomaines, IP);
+                try
+                {
+                    HostsFileManager.AddHostName(this.VhostInfo.Nom, this.VhostInfo.SousDomaines, IP);
+                }
+                catch (Exception ex)
+                {
+                    this.MainForm.StatusBarLabel.ForeColor = Color.Red;
+                    this.MainForm.StatusBarLabel.Text = ex.Message;
+                }
             }
             else
             {
-                HostsFileManager.DeleteHostName(this.VhostInfo.Nom);
+                try
+                {
+                    HostsFileManager.DeleteHostName(this.VhostInfo.Nom);
+                }
+                catch (Exception ex)
+                {
+                    this.MainForm.StatusBarLabel.ForeColor = Color.Red;
+                    this.MainForm.StatusBarLabel.Text = ex.Message;
+                }
             }
         }
 
@@ -442,6 +507,8 @@ namespace VhostManager
             bool isLocalValid = true;
             bool isDistantValid = true;
 
+            string errorMessage = string.Empty;
+
             string uncPath = this.UncPathBase;
          
             var bw = new BackgroundWorker();
@@ -451,7 +518,6 @@ namespace VhostManager
                 if (!Directory.Exists(VhostInfo.CheminLocal))
                 {
                     isLocalValid = false;
-
                 }
 
                 try
@@ -465,8 +531,9 @@ namespace VhostManager
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    errorMessage = ex.Message;
                     isDistantValid = false;
                 }
             };
@@ -483,7 +550,11 @@ namespace VhostManager
                 if (!isLocalValid)
                     this.labelErreur.Text = string.Format("Le chemin local n'est pas valide : {0}", VhostInfo.CheminLocal);
                 if (!isDistantValid)
-                    this.labelErreur.Text = string.Format("Le dossier du vhost est introuvable sur le serveur : {0}", uncPath);
+                {
+                    this.labelErreur.Text = string.Format("Impossible de se connecter au dossier du vhost linux : {0}", uncPath);
+                    this.MainForm.StatusBarLabel.ForeColor = Color.Red;
+                    this.MainForm.StatusBarLabel.Text = errorMessage;
+                }
             };
 
             // LANCE
@@ -494,6 +565,32 @@ namespace VhostManager
         {
             var credentials = new NetworkCredential(this.SSHConnectionInfos.Username, this.ConnexionPassword);
             return new NetworkConnection(uncPath, credentials);
+        }
+
+        private void linkLabelUnlockHosts_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string pathToApp = AppDomain.CurrentDomain.BaseDirectory + "\\HostsFileUnlocker.exe";
+            Process process = new Process();
+            process.StartInfo.FileName = pathToApp;
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            process.Start();
+            process.WaitForExit();
+            int code = process.ExitCode;
+            //if (code == -1)
+            //{
+            //    this.MainForm.StatusBarLabel.ForeColor = Color.Red;
+            //    this.MainForm.StatusBarLabel.Text = "Impossible de débloquer le fichier hosts";
+            //}
+
+            if (!HostsFileManager.HasAcces())
+            {
+                this.MainForm.StatusBarLabel.ForeColor = Color.Red;
+                this.MainForm.StatusBarLabel.Text = "Impossible de débloquer le fichier hosts";
+            }
+            else
+            {
+                this.panelUnlockHost.Visible = true;
+            }
         }
     }
 }

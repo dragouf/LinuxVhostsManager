@@ -35,9 +35,23 @@ namespace VhostManager
                 userName,
                 0);
 
+            string strErrMsg = "Connexion aux fichiers du vhost imposssible";
+            if (result == 67)
+            {
+                strErrMsg = "Serveur linux non trouvé.";
+            }
+            if (result == 86)
+            {
+                strErrMsg = "Connexion au vhost distant : Utlisateur ou mot de passe invalide.";
+            }
+            else if (result == 1219)
+            {
+                strErrMsg = "Vous avez enregistrer plusieurs connexions au serveur Linux avec différents utilisateurs.";
+            }
+
             if (result != 0)
             {
-                throw new Win32Exception(result, "Error connecting to remote share");
+                throw new Win32Exception(result, strErrMsg);
             }
         }
 

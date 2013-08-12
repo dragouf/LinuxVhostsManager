@@ -69,5 +69,31 @@ namespace VhostManager
             }
             
         }
+
+        public static bool HasAcces()
+        {
+            bool isOk = true;
+            try
+            {
+                File.AppendAllText(HostFile, Environment.NewLine);
+            }
+            catch
+            {
+                isOk = false;
+            }
+
+            if (isOk)
+                RemoveNewLineAtEnd();
+
+            return isOk;
+ 
+        }
+
+        private static void RemoveNewLineAtEnd()
+        {
+            var contenu = File.ReadAllText(HostFile);            
+            contenu = contenu.TrimEnd('\r', '\n');
+            File.WriteAllText(HostFile, contenu);
+        }
     }
 }

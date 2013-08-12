@@ -42,10 +42,15 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.linkLabelCheminLocal = new System.Windows.Forms.LinkLabel();
-            this.buttonSync = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.linkLabelMySQL = new System.Windows.Forms.LinkLabel();
             this.labelErreur = new System.Windows.Forms.Label();
+            this.pictureBoxHostsWarn = new System.Windows.Forms.PictureBox();
+            this.buttonSync = new System.Windows.Forms.Button();
+            this.linkLabelUnlockHosts = new System.Windows.Forms.LinkLabel();
+            this.panelUnlockHost = new System.Windows.Forms.Panel();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxHostsWarn)).BeginInit();
+            this.panelUnlockHost.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -95,10 +100,10 @@
             this.linkLabelNDD.AutoSize = true;
             this.linkLabelNDD.Location = new System.Drawing.Point(165, 16);
             this.linkLabelNDD.Name = "linkLabelNDD";
-            this.linkLabelNDD.Size = new System.Drawing.Size(82, 13);
+            this.linkLabelNDD.Size = new System.Drawing.Size(10, 13);
             this.linkLabelNDD.TabIndex = 4;
             this.linkLabelNDD.TabStop = true;
-            this.linkLabelNDD.Text = "vhostname.com";
+            this.linkLabelNDD.Text = "-";
             this.linkLabelNDD.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelNDD_LinkClicked);
             // 
             // radioButtonProd
@@ -130,9 +135,9 @@
             this.labelSync.AutoSize = true;
             this.labelSync.Location = new System.Drawing.Point(165, 125);
             this.labelSync.Name = "labelSync";
-            this.labelSync.Size = new System.Drawing.Size(104, 13);
+            this.labelSync.Size = new System.Drawing.Size(92, 13);
             this.labelSync.TabIndex = 7;
-            this.labelSync.Text = "En cours de calcul...";
+            this.labelSync.Text = "Aucune donnée...";
             // 
             // label4
             // 
@@ -173,25 +178,11 @@
             this.linkLabelCheminLocal.AutoSize = true;
             this.linkLabelCheminLocal.Location = new System.Drawing.Point(165, 88);
             this.linkLabelCheminLocal.Name = "linkLabelCheminLocal";
-            this.linkLabelCheminLocal.Size = new System.Drawing.Size(60, 13);
+            this.linkLabelCheminLocal.Size = new System.Drawing.Size(10, 13);
             this.linkLabelCheminLocal.TabIndex = 13;
             this.linkLabelCheminLocal.TabStop = true;
-            this.linkLabelCheminLocal.Text = "Non trouvé";
+            this.linkLabelCheminLocal.Text = "-";
             this.linkLabelCheminLocal.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelCheminLocal_LinkClicked);
-            // 
-            // buttonSync
-            // 
-            this.buttonSync.BackgroundImage = global::VhostManager.Properties.Resources.sync1;
-            this.buttonSync.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.buttonSync.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonSync.ForeColor = System.Drawing.SystemColors.Control;
-            this.buttonSync.Location = new System.Drawing.Point(324, 119);
-            this.buttonSync.Margin = new System.Windows.Forms.Padding(0);
-            this.buttonSync.Name = "buttonSync";
-            this.buttonSync.Size = new System.Drawing.Size(22, 22);
-            this.buttonSync.TabIndex = 10;
-            this.buttonSync.UseVisualStyleBackColor = true;
-            this.buttonSync.Click += new System.EventHandler(this.buttonSync_Click);
             // 
             // label7
             // 
@@ -217,17 +208,63 @@
             // labelErreur
             // 
             this.labelErreur.AutoSize = true;
-            this.labelErreur.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelErreur.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelErreur.ForeColor = System.Drawing.Color.Red;
-            this.labelErreur.Location = new System.Drawing.Point(12, 216);
+            this.labelErreur.Location = new System.Drawing.Point(13, 225);
             this.labelErreur.Name = "labelErreur";
-            this.labelErreur.Size = new System.Drawing.Size(0, 19);
+            this.labelErreur.Size = new System.Drawing.Size(0, 15);
             this.labelErreur.TabIndex = 16;
+            // 
+            // pictureBoxHostsWarn
+            // 
+            this.pictureBoxHostsWarn.Image = global::VhostManager.Properties.Resources.warning_error;
+            this.pictureBoxHostsWarn.Location = new System.Drawing.Point(4, 2);
+            this.pictureBoxHostsWarn.Name = "pictureBoxHostsWarn";
+            this.pictureBoxHostsWarn.Size = new System.Drawing.Size(16, 16);
+            this.pictureBoxHostsWarn.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.pictureBoxHostsWarn.TabIndex = 17;
+            this.pictureBoxHostsWarn.TabStop = false;
+            // 
+            // buttonSync
+            // 
+            this.buttonSync.BackgroundImage = global::VhostManager.Properties.Resources.sync1;
+            this.buttonSync.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.buttonSync.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonSync.ForeColor = System.Drawing.SystemColors.Control;
+            this.buttonSync.Location = new System.Drawing.Point(324, 119);
+            this.buttonSync.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonSync.Name = "buttonSync";
+            this.buttonSync.Size = new System.Drawing.Size(22, 22);
+            this.buttonSync.TabIndex = 10;
+            this.buttonSync.UseVisualStyleBackColor = true;
+            this.buttonSync.Click += new System.EventHandler(this.buttonSync_Click);
+            // 
+            // linkLabelUnlockHosts
+            // 
+            this.linkLabelUnlockHosts.AutoSize = true;
+            this.linkLabelUnlockHosts.Location = new System.Drawing.Point(27, 4);
+            this.linkLabelUnlockHosts.Name = "linkLabelUnlockHosts";
+            this.linkLabelUnlockHosts.Size = new System.Drawing.Size(126, 13);
+            this.linkLabelUnlockHosts.TabIndex = 18;
+            this.linkLabelUnlockHosts.TabStop = true;
+            this.linkLabelUnlockHosts.Text = "Débloquer le fichier hosts";
+            this.linkLabelUnlockHosts.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelUnlockHosts_LinkClicked);
+            // 
+            // panelUnlockHost
+            // 
+            this.panelUnlockHost.Controls.Add(this.linkLabelUnlockHosts);
+            this.panelUnlockHost.Controls.Add(this.pictureBoxHostsWarn);
+            this.panelUnlockHost.Location = new System.Drawing.Point(396, 46);
+            this.panelUnlockHost.Name = "panelUnlockHost";
+            this.panelUnlockHost.Size = new System.Drawing.Size(170, 22);
+            this.panelUnlockHost.TabIndex = 19;
+            this.panelUnlockHost.Visible = false;
             // 
             // VhostTab
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.panelUnlockHost);
             this.Controls.Add(this.labelErreur);
             this.Controls.Add(this.linkLabelMySQL);
             this.Controls.Add(this.label7);
@@ -246,6 +283,9 @@
             this.Controls.Add(this.label1);
             this.Name = "VhostTab";
             this.Size = new System.Drawing.Size(771, 240);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxHostsWarn)).EndInit();
+            this.panelUnlockHost.ResumeLayout(false);
+            this.panelUnlockHost.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -270,5 +310,8 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.LinkLabel linkLabelMySQL;
         private System.Windows.Forms.Label labelErreur;
+        private System.Windows.Forms.PictureBox pictureBoxHostsWarn;
+        private System.Windows.Forms.LinkLabel linkLabelUnlockHosts;
+        private System.Windows.Forms.Panel panelUnlockHost;
     }
 }

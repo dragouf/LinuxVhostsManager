@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VhostManager", "VhostManager\VhostManager.csproj", "{DFD5235D-5B80-461D-96DA-8CB8D3AF5F65}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostsFileUnlocker", "HostsFileUnlocker\HostsFileUnlocker.csproj", "{A29EF12C-20D2-4F8F-BB85-490DD8D7D20A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{DFD5235D-5B80-461D-96DA-8CB8D3AF5F65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFD5235D-5B80-461D-96DA-8CB8D3AF5F65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFD5235D-5B80-461D-96DA-8CB8D3AF5F65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A29EF12C-20D2-4F8F-BB85-490DD8D7D20A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A29EF12C-20D2-4F8F-BB85-490DD8D7D20A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A29EF12C-20D2-4F8F-BB85-490DD8D7D20A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A29EF12C-20D2-4F8F-BB85-490DD8D7D20A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

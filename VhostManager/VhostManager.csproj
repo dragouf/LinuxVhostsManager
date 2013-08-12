@@ -31,7 +31,7 @@
     <PublisherName>Web Alliance</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationRevision>10</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -51,7 +51,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -194,13 +194,16 @@
     <Content Include="Resources\add.png" />
     <Content Include="Resources\icon_ubuntu.png" />
     <Content Include="Libraries\Renci.SshNet.dll" />
-    <Content Include="Libraries\Renci.SshNet.pdb" />
     <Content Include="Libraries\Renci.SshNet.xml" />
     <Content Include="Resources\folder_explore.png" />
     <Content Include="Resources\sync1.png" />
     <Content Include="Resources\sync2.png" />
     <Content Include="Resources\sync3.png" />
     <Content Include="Resources\sync4.png" />
+    <Content Include="Resources\warning_error.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ExternalApp\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -210,4 +213,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="AfterBuild">
+    <Copy SourceFiles="$(ProjectDir)ExternalApp\HostsFileUnlocker.exe" DestinationFolder="$(ProjectDir)\$(OutDir)" ContinueOnError="true" />
+  </Target>
 </Project>

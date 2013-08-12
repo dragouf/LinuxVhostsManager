@@ -41,6 +41,7 @@ namespace VhostManager
                 return this.radioButtonSyncOui.Checked;
             }
         }
+        public ToolStripStatusLabel StatusBarLabel { get { return this.toolStripStatusLabelEtat; } }
 
         private ConnectionInfo SSHConnectionInfos
         {
@@ -114,16 +115,16 @@ namespace VhostManager
 
                     //Affichage temporaire d'un message de succes 
                     toolStripStatusLabelEtat.ForeColor = Color.Green;
-                    toolStripStatusLabelEtat.Text = "Connection terminée avec succès";
-                    Timer t = new Timer();
-                    t.Interval = 1000;
-                    t.Tick += (o, a) =>
-                    {
-                        t.Stop();
-                        toolStripStatusLabelEtat.ForeColor = Color.Black;
-                        toolStripStatusLabelEtat.Text = string.Empty;
-                    };
-                    t.Start();
+                    toolStripStatusLabelEtat.Text = "Connexion terminée";
+                    //Timer t = new Timer();
+                    //t.Interval = 1000;
+                    //t.Tick += (o, a) =>
+                    //{
+                    //    t.Stop();
+                    //    toolStripStatusLabelEtat.ForeColor = Color.Black;
+                    //    toolStripStatusLabelEtat.Text = string.Empty;
+                    //};
+                    //t.Start();
                 }
                 else
                 {

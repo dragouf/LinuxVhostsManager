@@ -369,6 +369,7 @@
             // 
             // tabPageCreateVhost
             // 
+            this.tabPageCreateVhost.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.tabPageCreateVhost.Controls.Add(this.comboBoxSousDomaine);
             this.tabPageCreateVhost.Controls.Add(this.buttonAddSubDomain);
             this.tabPageCreateVhost.Controls.Add(this.label12);
@@ -433,6 +434,7 @@
             // 
             // buttonBrowseLocal
             // 
+            this.buttonBrowseLocal.BackgroundImage = global::VhostManager.Properties.Resources.folder_explore;
             this.buttonBrowseLocal.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.buttonBrowseLocal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonBrowseLocal.ForeColor = System.Drawing.SystemColors.ControlLightLight;
