@@ -170,9 +170,9 @@
             this.label6.Font = new System.Drawing.Font("Calibri", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label6.Location = new System.Drawing.Point(168, 175);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(271, 13);
+            this.label6.Size = new System.Drawing.Size(267, 13);
             this.label6.TabIndex = 12;
-            this.label6.Text = "Le projet NetBeans pourra etre debugger (xdebug est actif)";
+            this.label6.Text = "Le projet NetBeans pourra etre debuggé (xdebug est actif)";
             // 
             // linkLabelCheminLocal
             // 

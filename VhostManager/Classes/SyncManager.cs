@@ -9,27 +9,24 @@ using System.Threading.Tasks;
 
 namespace VhostManager
 {
-    public class SyncManager
+    public class SyncManager : IDisposable
     {
-        //public static bool IsSynch(string localPath, string vhostDomaineName)
-        //{
-        //    FileSyncOptions options = FileSyncOptions.ExplicitDetectChanges |
-        // FileSyncOptions.RecycleDeletedFiles | FileSyncOptions.RecyclePreviousFileOnUpdates |
-        // FileSyncOptions.RecycleConflictLoserFiles;
-        //}
+        private FileSyncProvider SourceProvider { get; set; }
+        private FileSyncProvider TargetProvider { get; set; }
+        private SyncOrchestrator AgentOrcherstrator { get; set; }
 
+        private string UncPath { get; set; }
+        private string LocalPath { get; set; }
 
-        public static SyncOperationStatistics DetectChanges(string localPath, string vhostDomainName, string shareHost, string shareUsername, string sharePassword, SyncDirection syncDirection)
+        public SyncManager(string localPath, string shareHost, string vhostDomainName)
         {
-            return SyncProvider(localPath, vhostDomainName, shareHost, shareUsername, sharePassword, syncDirection, justStats: true);
+            this.UncPath = string.Format(@"\\{0}\vhosts\{1}\httpdocs", shareHost, vhostDomainName);
+            this.LocalPath = localPath;
+
+            InitializeSyncAgent();
         }
 
-        public static SyncOperationStatistics Synchronize(string localPath, string vhostDomainName, string shareHost, string shareUsername, string sharePassword, SyncDirection syncDirection)
-        {
-            return SyncProvider(localPath, vhostDomainName, shareHost, shareUsername, sharePassword, syncDirection, justStats: false);
-        }
-
-        private static SyncOperationStatistics SyncProvider(string localPath, string vhostDomainName, string shareHost, string shareUsername, string sharePassword, SyncDirection syncDirection, bool justStats)
+        private void InitializeSyncAgent()
         {
             // Set options for the sync operation
             FileSyncOptions options = FileSyncOptions.CompareFileStreams;
@@ -38,45 +35,52 @@ namespace VhostManager
             filter.FileNameExcludes.Add("*.lnk"); // Exclude all *.lnk files
             filter.FileNameExcludes.Add("Thumbs.db");
 
-            FileSyncProvider sourceProvider = null;
-            FileSyncProvider targetProvider = null;
+            this.SourceProvider = new FileSyncProvider(this.LocalPath, filter, options);
+            this.TargetProvider = new FileSyncProvider(this.UncPath, filter, options);
 
-            SyncOperationStatistics stats = null;
+            this.AgentOrcherstrator = new SyncOrchestrator();
+            this.AgentOrcherstrator.LocalProvider = SourceProvider;
+            this.AgentOrcherstrator.RemoteProvider = TargetProvider;
+        }
 
-            string uncPath = string.Format(@"\\{0}\vhosts\{1}\httpdocs", shareHost, vhostDomainName);
+        public SyncOperationStatistics DetectChanges( string shareUsername, string sharePassword, SyncDirection syncDirection)
+        {
+            return SyncProvider(shareUsername, sharePassword, syncDirection, justStats: true);
+        }
+
+        public SyncOperationStatistics Synchronize(string shareUsername, string sharePassword, SyncDirection syncDirection)
+        {
+            return SyncProvider(shareUsername, sharePassword, syncDirection, justStats: false);
+        }
+
+        private SyncOperationStatistics SyncProvider(string shareUsername, string sharePassword, SyncDirection syncDirection, bool justStats)
+        {
+            SyncOperationStatistics stats = null;            
             var credentials = new NetworkCredential(shareUsername, sharePassword);
 
             try
             {
-                using (new NetworkConnection(uncPath, credentials))
+                using (new NetworkConnection(this.UncPath, credentials))
                 {
-
-                    sourceProvider = new FileSyncProvider(localPath, filter, options);
-                    targetProvider = new FileSyncProvider(uncPath, filter, options);
-
-                    sourceProvider.PreviewMode = justStats;
-                    targetProvider.PreviewMode = justStats;
+                    SourceProvider.PreviewMode = justStats;
+                    TargetProvider.PreviewMode = justStats;
 
                     //targetProvider.AppliedChange += new EventHandler<AppliedChangeEventArgs>(OnAppliedChange);
-                    //targetProvider.SkippedChange += new EventHandler<SkippedChangeEventArgs>(OnSkippedChange);
-
-                    SyncOrchestrator agent = new SyncOrchestrator();
-                    agent.LocalProvider = sourceProvider;
-                    agent.RemoteProvider = targetProvider;
+                    //targetProvider.SkippedChange += new EventHandler<SkippedChangeEventArgs>(OnSkippedChange);                    
 
                     switch (syncDirection)
                     {
-                        case SyncDirection.Upload: agent.Direction = SyncDirectionOrder.Upload;
+                        case SyncDirection.Upload: this.AgentOrcherstrator.Direction = SyncDirectionOrder.Upload;
                             break;
-                        case SyncDirection.Download: agent.Direction = SyncDirectionOrder.Download;
+                        case SyncDirection.Download: this.AgentOrcherstrator.Direction = SyncDirectionOrder.Download;
                             break;
-                        case SyncDirection.Both: agent.Direction = SyncDirectionOrder.UploadAndDownload; // Sync source to destination      
+                        case SyncDirection.Both: this.AgentOrcherstrator.Direction = SyncDirectionOrder.UploadAndDownload; // Sync source to destination      
                             break;
-                        default: agent.Direction = SyncDirectionOrder.UploadAndDownload;
+                        default: this.AgentOrcherstrator.Direction = SyncDirectionOrder.UploadAndDownload;
                             break;
                     }
 
-                    stats = agent.Synchronize();
+                    stats = this.AgentOrcherstrator.Synchronize();
                 }
 
                 return stats;
@@ -84,17 +88,30 @@ namespace VhostManager
             finally
             {
                 // Release resources
-                if (sourceProvider != null)
-                {
-                    sourceProvider.Dispose();
-                }
+                //if (SourceProvider != null)
+                //{
+                //    SourceProvider.Dispose();
+                //}
 
-                if (targetProvider != null)
-                {
-                    targetProvider.Dispose();
-                }
+                //if (TargetProvider != null)
+                //{
+                //    TargetProvider.Dispose();
+                //}
             }
         }
 
+        public void Dispose()
+        {
+            // Release resources
+            if (SourceProvider != null)
+            {
+                SourceProvider.Dispose();
+            }
+
+            if (TargetProvider != null)
+            {
+                TargetProvider.Dispose();
+            }
+        }
     }
 }

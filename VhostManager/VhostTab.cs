@@ -83,6 +83,8 @@ namespace VhostManager
         public event VhostDeletedDelegate VhostDeleted;
         public delegate void VhostDeletedDelegate();
 
+        private SyncManager SyncManagerVhost { get; set; }
+
         public VhostTab(VhostDetails vhostDetails, ConnectionInfo sshInfo, string sshPassword, FormMain parentForm)
         {
             InitializeComponent();
@@ -140,10 +142,7 @@ namespace VhostManager
             {
                 try
                 {
-                    statsSync = SyncManager.DetectChanges(
-                        this.VhostInfo.CheminLocal,
-                        this.VhostInfo.Nom,
-                        this.SSHConnectionInfos.Host,
+                    statsSync = this.SyncManagerVhost.DetectChanges(
                         this.SSHConnectionInfos.Username,
                         this.ConnexionPassword,
                         syncDirection);
@@ -219,10 +218,7 @@ namespace VhostManager
             {
                 try
                 {
-                    statsSync = SyncManager.Synchronize(
-                        this.VhostInfo.CheminLocal,
-                        this.VhostInfo.Nom,
-                        this.SSHConnectionInfos.Host,
+                    statsSync = this.SyncManagerVhost.Synchronize(
                         this.SSHConnectionInfos.Username,
                         this.ConnexionPassword,
                         syncDirection);
@@ -525,7 +521,7 @@ namespace VhostManager
             var bw = new BackgroundWorker();
             // DEMARRE
             bw.DoWork += (s, args) =>
-            {
+            {                
                 if (!Directory.Exists(VhostInfo.CheminLocal))
                 {
                     isLocalValid = false;
@@ -547,6 +543,9 @@ namespace VhostManager
                     errorMessage = ex.Message;
                     isDistantValid = false;
                 }
+
+                if (isLocalValid && isDistantValid)
+                    this.SyncManagerVhost = new SyncManager(this.VhostInfo.CheminLocal, this.SSHConnectionInfos.Host, this.VhostInfo.Nom);
             };
 
             // TERMINE
@@ -638,7 +637,7 @@ namespace VhostManager
                 {
                     Process process = new Process();
                     process.StartInfo.FileName = netbeansInstallFolder64;
-                    process.StartInfo.Arguments = "--open " + VhostInfo.CheminLocal;
+                    process.StartInfo.Arguments = string.Format(@"--open ""{0}""", VhostInfo.CheminLocal);
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                     process.Start();
                 }
@@ -646,7 +645,7 @@ namespace VhostManager
                 {
                     Process process = new Process();
                     process.StartInfo.FileName = netbeansInstallFolder32;
-                    process.StartInfo.Arguments = "--open " + VhostInfo.CheminLocal;
+                    process.StartInfo.Arguments = string.Format(@"--open ""{0}""", VhostInfo.CheminLocal);
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                     process.Start();
  

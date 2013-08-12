@@ -16,18 +16,20 @@ namespace VhostManager
 
         public static void CreateProject(string localPath, string domainName)
         {
-            var projectXmlFile = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\project.xml";
-            var projectPropertiesFile = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\project.properties";
-            var privatePropertiesFile = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\private.properties";
-            var privateXmlFile = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\private.xml";
+            var projectXmlFile = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\project.new";
+            var projectXmlFileGood = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\project.xml";
+            var projectPropertiesFile = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\project.properties.new";
+            var privatePropertiesFile = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\private.properties.new";
+            var privatePropertiesFileGood = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\private.properties.new";
+            var privateXmlFile = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\private.new";
 
             var projectXmlContent = File.ReadAllText(projectXmlFile);
             projectXmlContent = string.Format(projectXmlContent, domainName);
-            File.WriteAllText(projectXmlFile, projectXmlContent);
+            File.WriteAllText(projectXmlFileGood, projectXmlContent);
          
             var privatePropertiesContent = File.ReadAllText(privatePropertiesFile);
             privatePropertiesContent = string.Format(privatePropertiesContent, "www." + domainName);
-            File.WriteAllText(privatePropertiesFile, privatePropertiesContent);
+            File.WriteAllText(privatePropertiesFileGood, privatePropertiesContent);
 
             // cree les dossiers
             string nbprojectFolder = string.Format(@"{0}\nbproject", localPath);
@@ -38,9 +40,9 @@ namespace VhostManager
                 Directory.CreateDirectory(nbprojectPrivateFolder);
 
             // Copie les fichiers
-            File.Copy(projectXmlFile, nbprojectFolder + "\\project.xml");
+            File.Copy(projectXmlFileGood, nbprojectFolder + "\\project.xml");
             File.Copy(projectPropertiesFile, nbprojectFolder + "\\project.properties");
-            File.Copy(privatePropertiesFile, nbprojectFolder + "\\private\\private.properties");
+            File.Copy(privatePropertiesFileGood, nbprojectFolder + "\\private\\private.properties");
             File.Copy(privateXmlFile, nbprojectFolder + "\\private\\private.xml");
         }
     }
