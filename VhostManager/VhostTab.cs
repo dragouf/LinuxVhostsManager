@@ -638,7 +638,7 @@ namespace VhostManager
                     Process process = new Process();
                     process.StartInfo.FileName = netbeansInstallFolder;
                     process.StartInfo.Arguments = "--open " + VhostInfo.CheminLocal;
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                     process.Start();
                 }
             }
