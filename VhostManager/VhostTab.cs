@@ -645,7 +645,7 @@ namespace VhostManager
                 else
                 {
                     Process process = new Process();
-                    process.StartInfo.FileName = netbeansInstallFolder64;
+                    process.StartInfo.FileName = netbeansInstallFolder32;
                     process.StartInfo.Arguments = "--open " + VhostInfo.CheminLocal;
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                     process.Start();
