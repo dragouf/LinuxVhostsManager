@@ -46,7 +46,7 @@ namespace VhostManager
             }
             else if (result == 1219)
             {
-                strErrMsg = "Vous avez enregistrer plusieurs connexions au serveur Linux avec différents utilisateurs.";
+                strErrMsg = "Vous avez enregistré plusieurs connexions au serveur Linux avec différents utilisateurs.";
             }
 
             if (result != 0)

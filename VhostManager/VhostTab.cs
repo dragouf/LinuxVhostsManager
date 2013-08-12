@@ -11,6 +11,8 @@ using Renci.SshNet;
 using System.Net;
 using System.IO;
 using System.Diagnostics;
+using Microsoft.Win32;
+using System.Xml.Linq;
 
 namespace VhostManager
 {
@@ -20,7 +22,7 @@ namespace VhostManager
 
         public string UncPathBase
         {
-            get 
+            get
             {
                 return string.Format(@"\\{0}\vhosts\{1}\httpdocs", this.SSHConnectionInfos.Host, this.VhostInfo.Nom);
             }
@@ -28,13 +30,13 @@ namespace VhostManager
         private bool IsSyncInProgress { get; set; }
 
         private VhostDetails VhostInfo { get; set; }
-        private ConnectionInfo SSHConnectionInfos {get;set;}
-        private string ConnexionPassword { get; set; }       
+        private ConnectionInfo SSHConnectionInfos { get; set; }
+        private string ConnexionPassword { get; set; }
 
         private Timer _AnimationTimer;
-        private Timer AnimationTimer 
+        private Timer AnimationTimer
         {
-            get 
+            get
             {
                 if (_AnimationTimer == null)
                     _AnimationTimer = new Timer();
@@ -67,7 +69,7 @@ namespace VhostManager
 
         private FileWatcher _FileSync;
         private FileWatcher FileSync
-        { 
+        {
             get
             {
                 if (_FileSync == null)
@@ -112,7 +114,7 @@ namespace VhostManager
 
             // Etat de synchronisation
             this.CheckSync();
-            
+
             // Verifie l'acces au fichier hosts
             if (!HostsFileManager.HasAcces())
                 this.panelUnlockHost.Visible = true;
@@ -171,6 +173,8 @@ namespace VhostManager
                 }
                 else
                 {
+                    labelSync.ForeColor = Color.Red;
+                    labelSync.Text = string.Format("Dossier en cours de sync. par un autre utilisateur!");
                     this.MainForm.StatusBarLabel.ForeColor = Color.Red;
                     this.MainForm.StatusBarLabel.Text = errorMessage.Replace(Environment.NewLine, "");
                 }
@@ -192,12 +196,14 @@ namespace VhostManager
             //this.StoptWatchLocalFolder();
             string errorMessage = string.Empty;
 
-            this.labelSync.Invoke((MethodInvoker)(() => {
+            this.labelSync.Invoke((MethodInvoker)(() =>
+            {
                 labelSync.ForeColor = Color.Orange;
                 labelSync.Text = string.Format("En cours de synchronisation...");
             }));
 
-            this.buttonSync.Invoke((MethodInvoker)(() => {
+            this.buttonSync.Invoke((MethodInvoker)(() =>
+            {
                 AnimateSyncButton(true);
                 this.buttonSync.Enabled = false;
             }));
@@ -206,7 +212,7 @@ namespace VhostManager
             Microsoft.Synchronization.SyncOperationStatistics statsSync = null;
             var bw = new BackgroundWorker();
 
-            
+
 
             // DEMARRE
             bw.DoWork += (s, args) =>
@@ -259,10 +265,12 @@ namespace VhostManager
                 }
                 else
                 {
+                    labelSync.ForeColor = Color.Red;
+                    labelSync.Text = string.Format("Dossier en cours de sync. par un autre utilisateur!");
                     this.MainForm.StatusBarLabel.ForeColor = Color.Red;
                     this.MainForm.StatusBarLabel.Text = errorMessage.Replace(Environment.NewLine, "");
                 }
-                
+
 
                 this.IsSyncInProgress = false;
                 //this.StartWatchLocalFolder();
@@ -321,7 +329,7 @@ namespace VhostManager
             };
 
             // LANCE
-            bw.RunWorkerAsync();            
+            bw.RunWorkerAsync();
         }
 
         /// <summary>
@@ -378,7 +386,7 @@ namespace VhostManager
         {
             if (start)
             {
-                this.AnimationTimer.Interval = 400;
+                this.AnimationTimer.Interval = 500;
                 this.AnimationTimer.Tick += (sender, args) =>
                 {
                     int index = 0;
@@ -390,7 +398,7 @@ namespace VhostManager
                     }
 
                     var listImage = new List<Bitmap> { Properties.Resources.sync1, Properties.Resources.sync2, Properties.Resources.sync3, Properties.Resources.sync4 };
-                                        
+
                     this.buttonSync.BackgroundImage = listImage[index];
                     this.AnimationTimer.Tag = index + 1;
                 };
@@ -423,21 +431,6 @@ namespace VhostManager
                 // si sync auto lance une synchro
                 if (((FormMain)this.MainForm).AutoSync)
                 {
-                    // Attend 1 minutes avant de lancer une synchro
-                    //var syncTimer = new System.Timers.Timer();
-                    //syncTimer.Interval = 30000;
-                    //syncTimer.Elapsed += (t, args) =>
-                    //{
-                    //    if (!this.IsSyncInProgress)
-                    //    {
-                    //        this.StartSync();
-                    //    }
-
-                    //    syncTimer.Stop();
-                    //};
-
-                    //syncTimer.Start();
-
                     try
                     {
                         switch (e.ChangeType)
@@ -459,16 +452,18 @@ namespace VhostManager
                             default:
                                 this.labelSync.Invoke((MethodInvoker)(() =>
                                 {
+                                    this.buttonSync.Visible = true;
                                     this.labelSync.ForeColor = Color.Red;
                                     this.labelSync.Text = "Fichiers non synchronisés!";
                                 }));
                                 break;
                         }
                     }
-                    catch (Exception ex)
+                    catch 
                     {
                         this.labelSync.Invoke((MethodInvoker)(() =>
                         {
+                            this.buttonSync.Visible = true;
                             this.labelSync.ForeColor = Color.Red;
                             this.labelSync.Text = "Fichiers non synchronisés!";
                         }));
@@ -481,18 +476,34 @@ namespace VhostManager
                     {
                         this.labelSync.Invoke((MethodInvoker)(() =>
                         {
+                            this.buttonSync.Visible = true;
                             this.labelSync.ForeColor = Color.Red;
                             this.labelSync.Text = "Fichiers non synchronisés!";
                         }));
                     }
                 }
+
+                // Attend 1 minutes avant de lancer une synchro
+                //var syncTimer = new System.Timers.Timer();
+                //syncTimer.Interval = 30000;
+                //syncTimer.Elapsed += (t, args) =>
+                //{
+                //    if (!this.IsSyncInProgress)
+                //    {
+                //        this.StartSync();
+                //    }
+
+                //    syncTimer.Stop();
+                //};
+
+                //syncTimer.Start();
             }
         }
         #endregion
 
         private void linkLabelCheminLocal_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if(Directory.Exists(this.VhostInfo.CheminLocal))
+            if (Directory.Exists(this.VhostInfo.CheminLocal))
                 Process.Start(string.Format("{0}", this.VhostInfo.CheminLocal));
         }
 
@@ -510,7 +521,7 @@ namespace VhostManager
             string errorMessage = string.Empty;
 
             string uncPath = this.UncPathBase;
-         
+
             var bw = new BackgroundWorker();
             // DEMARRE
             bw.DoWork += (s, args) =>
@@ -558,7 +569,7 @@ namespace VhostManager
             };
 
             // LANCE
-            bw.RunWorkerAsync();         
+            bw.RunWorkerAsync();
         }
 
         private NetworkConnection GetNetworkConnection(string uncPath)
@@ -590,6 +601,50 @@ namespace VhostManager
             else
             {
                 this.panelUnlockHost.Visible = true;
+            }
+        }
+
+        private void linkLabelNetBeans_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string netbeansInstallFolder = string.Empty;
+
+            var userPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string netbeansConfPath = string.Format("{0}\\.nbi\\registry.xml", userPath);
+            var xmlLocal = XDocument.Load(netbeansConfPath);
+
+            var properties = from elm in xmlLocal.Descendants("components").SelectMany(d => d.Descendants("product"))
+                             where (string)elm.Attribute("uid") == "nb-base"
+                             select elm;
+
+            var key = (from element in properties.Descendants("property")
+                       where (string)element.Attribute("name") == "installation.location.windows"
+                       select element).FirstOrDefault();
+
+            if (key != null)
+            {
+                netbeansInstallFolder = key.Value + @"\bin\netbeans64.exe";
+            }
+
+            if (!string.IsNullOrEmpty(netbeansInstallFolder))
+            {
+
+                if (!NetbeansProjectManager.IsProjectExist(VhostInfo.CheminLocal))
+                {
+                    NetbeansProjectManager.CreateProject(VhostInfo.CheminLocal, VhostInfo.Nom);
+                }
+
+                if (File.Exists(netbeansInstallFolder))
+                {
+                    Process process = new Process();
+                    process.StartInfo.FileName = netbeansInstallFolder;
+                    process.StartInfo.Arguments = "--open " + VhostInfo.CheminLocal;
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    process.Start();
+                }
+            }
+            else
+            {
+                MessageBox.Show(this, "NetBeans ne semble pas etre installé.", "NetBeans introuvable...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
     }

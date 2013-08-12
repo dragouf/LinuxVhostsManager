@@ -49,6 +49,7 @@
             this.buttonSync = new System.Windows.Forms.Button();
             this.linkLabelUnlockHosts = new System.Windows.Forms.LinkLabel();
             this.panelUnlockHost = new System.Windows.Forms.Panel();
+            this.linkLabelNetBeans = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxHostsWarn)).BeginInit();
             this.panelUnlockHost.SuspendLayout();
             this.SuspendLayout();
@@ -166,12 +167,12 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(165, 165);
+            this.label6.Font = new System.Drawing.Font("Calibri", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(168, 175);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(444, 13);
+            this.label6.Size = new System.Drawing.Size(271, 13);
             this.label6.TabIndex = 12;
-            this.label6.Text = "Vous pouvez créer un projet netbeans avec les fichiers locaux et debugger (xdebug" +
-    " est actif)";
+            this.label6.Text = "Le projet NetBeans pourra etre debugger (xdebug est actif)";
             // 
             // linkLabelCheminLocal
             // 
@@ -231,7 +232,7 @@
             this.buttonSync.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.buttonSync.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonSync.ForeColor = System.Drawing.SystemColors.Control;
-            this.buttonSync.Location = new System.Drawing.Point(324, 119);
+            this.buttonSync.Location = new System.Drawing.Point(414, 120);
             this.buttonSync.Margin = new System.Windows.Forms.Padding(0);
             this.buttonSync.Name = "buttonSync";
             this.buttonSync.Size = new System.Drawing.Size(22, 22);
@@ -260,10 +261,22 @@
             this.panelUnlockHost.TabIndex = 19;
             this.panelUnlockHost.Visible = false;
             // 
+            // linkLabelNetBeans
+            // 
+            this.linkLabelNetBeans.AutoSize = true;
+            this.linkLabelNetBeans.Location = new System.Drawing.Point(168, 162);
+            this.linkLabelNetBeans.Name = "linkLabelNetBeans";
+            this.linkLabelNetBeans.Size = new System.Drawing.Size(105, 13);
+            this.linkLabelNetBeans.TabIndex = 20;
+            this.linkLabelNetBeans.TabStop = true;
+            this.linkLabelNetBeans.Text = "Créer/Ouvrir le projet";
+            this.linkLabelNetBeans.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelNetBeans_LinkClicked);
+            // 
             // VhostTab
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.linkLabelNetBeans);
             this.Controls.Add(this.panelUnlockHost);
             this.Controls.Add(this.labelErreur);
             this.Controls.Add(this.linkLabelMySQL);
@@ -313,5 +326,6 @@
         private System.Windows.Forms.PictureBox pictureBoxHostsWarn;
         private System.Windows.Forms.LinkLabel linkLabelUnlockHosts;
         private System.Windows.Forms.Panel panelUnlockHost;
+        private System.Windows.Forms.LinkLabel linkLabelNetBeans;
     }
 }
