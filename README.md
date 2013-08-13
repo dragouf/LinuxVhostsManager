@@ -38,7 +38,7 @@ sudo apt-get install samba
 sudo vim /etc/samba/smb.conf
 ```
 
-*add*
+*Add*
 ```
 security = user
 
