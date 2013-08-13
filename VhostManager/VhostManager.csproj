@@ -108,24 +108,24 @@
     <Compile Include="Classes\NetbeansProjectManager.cs" />
     <Compile Include="Classes\SecurePassword.cs" />
     <Compile Include="Classes\InstantCopier.cs" />
-    <Compile Include="ColorProgressBar.cs">
+    <Compile Include="UserControls\ColorProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Classes\HddSpaceInfos.cs" />
+    <Compile Include="Classes\Data\HddSpaceInfos.cs" />
     <Compile Include="Classes\SyncManager.cs" />
-    <Compile Include="Classes\VhostDetails.cs" />
+    <Compile Include="Classes\Data\VhostDetails.cs" />
     <Compile Include="Extensions\StringExtension.cs" />
     <Compile Include="Extensions\IntExtension.cs" />
-    <Compile Include="FormLogs.cs">
+    <Compile Include="Forms\FormLogs.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormLogs.Designer.cs">
+    <Compile Include="Forms\FormLogs.Designer.cs">
       <DependentUpon>FormLogs.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormMain.cs">
+    <Compile Include="Forms\FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormMain.Designer.cs">
+    <Compile Include="Forms\FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\HostsFileManager.cs" />
@@ -133,23 +133,23 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classes\VhostsFileManager.cs" />
-    <Compile Include="SyncDirectionEnum.cs" />
-    <Compile Include="SyncHistoryForm.cs">
+    <Compile Include="Extensions\SyncDirectionEnum.cs" />
+    <Compile Include="Forms\SyncHistoryForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SyncHistoryForm.Designer.cs">
+    <Compile Include="Forms\SyncHistoryForm.Designer.cs">
       <DependentUpon>SyncHistoryForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="VhostTab.cs">
+    <Compile Include="UserControls\VhostTab.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="VhostTab.Designer.cs">
+    <Compile Include="UserControls\VhostTab.Designer.cs">
       <DependentUpon>VhostTab.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="FormLogs.resx">
+    <EmbeddedResource Include="Forms\FormLogs.resx">
       <DependentUpon>FormLogs.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormMain.resx">
+    <EmbeddedResource Include="Forms\FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -162,10 +162,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="SyncHistoryForm.resx">
+    <EmbeddedResource Include="Forms\SyncHistoryForm.resx">
       <DependentUpon>SyncHistoryForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="VhostTab.resx">
+    <EmbeddedResource Include="UserControls\VhostTab.resx">
       <DependentUpon>VhostTab.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />

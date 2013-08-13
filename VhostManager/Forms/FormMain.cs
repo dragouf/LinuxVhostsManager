@@ -2,12 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace VhostManager
@@ -15,6 +12,33 @@ namespace VhostManager
     public partial class FormMain : Form
     {
         private ColorProgressBar progressBarFreeSpace;
+
+        public FormMain()
+        {
+            InitializeComponent();
+
+            // free disk space linux
+            this.progressBarFreeSpace = new ColorProgressBar();
+            this.progressBarFreeSpace.Location = new System.Drawing.Point(140, 25);
+            this.progressBarFreeSpace.Name = "progressBarFreeSpace";
+            this.progressBarFreeSpace.Size = new System.Drawing.Size(228, 13);
+            this.progressBarFreeSpace.TabIndex = 13;
+            this.groupBox1.Controls.Add(this.progressBarFreeSpace);
+
+            this.LoadUserSettings();
+            this.LoadSshInfosAsync();
+        }
+
+        #region Properties
+        public bool AutoSync
+        {
+            get
+            {
+                return this.radioButtonSyncOui.Checked;
+            }
+        }
+
+        public ToolStripStatusLabel StatusBarLabel { get { return this.toolStripStatusLabelEtat; } }
 
         public SyncDirection SyncDirection
         {
@@ -34,14 +58,6 @@ namespace VhostManager
                 }
             }
         }
-        public bool AutoSync
-        {
-            get
-            {
-                return this.radioButtonSyncOui.Checked;
-            }
-        }
-        public ToolStripStatusLabel StatusBarLabel { get { return this.toolStripStatusLabelEtat; } }
 
         private ConnectionInfo SSHConnectionInfos
         {
@@ -51,22 +67,71 @@ namespace VhostManager
                 return new ConnectionInfo(this.textBoxHost.Text, (int)this.numericUpDownPort.Value, this.textBoxUser.Text, authMethod);
             }
         }
+        #endregion
 
-        public FormMain()
+        #region Forms Event
+        public void ShowWindow()
         {
-            InitializeComponent();
-            // free disk space linux 
-            this.progressBarFreeSpace = new ColorProgressBar();
-            this.progressBarFreeSpace.Location = new System.Drawing.Point(140, 25);
-            this.progressBarFreeSpace.Name = "progressBarFreeSpace";
-            this.progressBarFreeSpace.Size = new System.Drawing.Size(228, 13);
-            this.progressBarFreeSpace.TabIndex = 13;
-            this.groupBox1.Controls.Add(this.progressBarFreeSpace);
+            // Insert code here to make your form show itself.
+            WinApi.ShowToFront(this.Handle);
+        }
 
-            this.LoadSettings();
+        protected override void WndProc(ref Message message)
+        {
+            if (message.Msg == SingleInstance.WM_SHOWFIRSTINSTANCE)
+            {
+                ShowWindow();
+            }
+            base.WndProc(ref message);
+        }
+
+        private void buttonAddSubDomain_Click(object sender, EventArgs e)
+        {
+            this.comboBoxSousDomaine.Items.Add(this.comboBoxSousDomaine.Text);
+            this.comboBoxSousDomaine.Text = string.Empty;
+        }
+
+        private void buttonBrowseLocal_Click(object sender, EventArgs e)
+        {
+            if (this.folderBrowserDialogLocal.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                textBoxCheminLocal.Text = this.folderBrowserDialogLocal.SelectedPath;
+            }
+        }
+
+        private void buttonConnexion_Click(object sender, EventArgs e)
+        {
+            this.SaveUserSettings();
             this.LoadSshInfosAsync();
         }
 
+        private void buttonCreerVhost_Click(object sender, EventArgs e)
+        {
+            this.CreateVhostAsync();
+        }
+
+        private void comboBoxSousDomaine_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                if (comboBoxSousDomaine.SelectedIndex >= 0 && comboBoxSousDomaine.Items.Count > 1)
+                    comboBoxSousDomaine.Items.RemoveAt(comboBoxSousDomaine.SelectedIndex);
+            }
+        }
+
+        private void textBoxNomDomaine_TextChanged(object sender, EventArgs e)
+        {
+            this.labelCheminDistant.Text = string.Format("/var/www/vhosts/{0}", this.textBoxNomDomaine.Text);
+        }
+
+        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Enregistre les parametres ssh
+            this.SaveUserSettings();
+        }        
+        #endregion      
+
+        #region Linux Infos
         private void LoadSshInfosAsync()
         {
             bool isConnected = false;
@@ -119,7 +184,7 @@ namespace VhostManager
                         this.progressBarFreeSpace.BrushColor = (hddInfos.Used * 100 / hddInfos.Total) < 85 ? Brushes.Green : Brushes.Red;
                     }
 
-                    //Affichage temporaire d'un message de succes 
+                    //Affichage temporaire d'un message de succes
                     toolStripStatusLabelEtat.ForeColor = Color.Green;
                     toolStripStatusLabelEtat.Text = "Connexion terminée";
                     //Timer t = new Timer();
@@ -140,15 +205,17 @@ namespace VhostManager
             };
 
             bw.RunWorkerAsync();
-        }
+        }        
+        #endregion
 
+        #region Vhosts Infos
         private void LoadVhostsTabs(List<VhostDetails> liste)
         {
             // Recree les onglets
             foreach (var vhost in liste)
             {
                 // Ajoute que si n'existe pas deja
-                if (!this.IsTabContainVhost(vhost.Nom))
+                if (!this.IsVhostAlreadyAttachToTab(vhost.Nom))
                 {
                     var tab = new TabPage(vhost.Nom);
                     tab.Tag = vhost;
@@ -183,7 +250,7 @@ namespace VhostManager
             vhostTabs.Clear();
         }
 
-        private bool IsTabContainVhost(string domainName)
+        private bool IsVhostAlreadyAttachToTab(string domainName)
         {
             foreach (TabPage tab in this.tabControlMain.TabPages)
             {
@@ -195,20 +262,12 @@ namespace VhostManager
             return false;
         }
 
-        private void buttonBrowseLocal_Click(object sender, EventArgs e)
+        private List<VhostDetails> EnumerateVhosts()
         {
-            if (this.folderBrowserDialogLocal.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                textBoxCheminLocal.Text = this.folderBrowserDialogLocal.SelectedPath;
-            }
+            return VhostsFileManager.ListVhosts(this.SSHConnectionInfos);
         }
 
-        private void textBoxNomDomaine_TextChanged(object sender, EventArgs e)
-        {
-            this.labelCheminDistant.Text = string.Format("/var/www/vhosts/{0}", this.textBoxNomDomaine.Text);
-        }
-
-        private void buttonCreerVhost_Click(object sender, EventArgs e)
+        private void CreateVhostAsync()
         {
             string vhostUsedName = string.Empty;
             bool isVhostExist = false;
@@ -220,8 +279,12 @@ namespace VhostManager
                 if (tab.Tag is VhostDetails)
                 {
                     var vhostDetails = (VhostDetails)tab.Tag;
+
+                    // Nom du vhosts
                     if (vhostDetails.Nom == this.textBoxNomDomaine.Text)
                         isVhostExist = true;
+
+                    // Chemin local
                     if (vhostDetails.CheminLocal == this.textBoxCheminLocal.Text)
                     {
                         vhostUsedName = vhostDetails.Nom;
@@ -229,12 +292,13 @@ namespace VhostManager
                     }
                 }
             }
+
             if (!isVhostExist && !isFolderUsed && IsFolderValid)
             {
                 bool isOK = true;
                 string errorMessage = string.Empty;
 
-                string nomDomaine = this.textBoxNomDomaine.Text.Trim();               
+                string nomDomaine = this.textBoxNomDomaine.Text.Trim();
                 string cheminLocal = this.textBoxCheminLocal.Text.Trim();
                 var sousDomaines = new List<string>();
                 foreach (string item in this.comboBoxSousDomaine.Items)
@@ -271,14 +335,6 @@ namespace VhostManager
                         toolStripStatusLabelEtat.ForeColor = Color.Green;
                         toolStripStatusLabelEtat.Text = "Création du vhost terminé...";
                         this.LoadSshInfosAsync();
-                        // Affichage temporaire d'un message de succes                    
-                        //Timer t = new Timer();
-                        //t.Interval = 1000;
-                        //t.Tick += (o, a) => {
-                        //    t.Stop();
-                        //    labelLoading.Text = string.Empty;
-                        //};
-                        //t.Start();
                     }
                     else
                     {
@@ -305,20 +361,10 @@ namespace VhostManager
                 MessageBox.Show(message, "Données existante", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
-
-        private List<VhostDetails> EnumerateVhosts()
-        {
-            return VhostsFileManager.ListVhosts(this.SSHConnectionInfos);
-        }
-
-        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            // Enregistre les parametres ssh
-            this.SaveSettings();
-        }
+        #endregion
 
         #region Parametres
-        private void LoadSettings()
+        private void LoadUserSettings()
         {
             Properties.Settings.Default.Upgrade();
 
@@ -333,16 +379,19 @@ namespace VhostManager
             {
                 case SyncDirection.Upload: this.radioButtonUpload.Checked = true;
                     break;
+
                 case SyncDirection.Download: this.radioButtonDownload.Checked = true;
                     break;
+
                 case SyncDirection.Both: this.radioButtonBoth.Checked = true;
                     break;
+
                 default: this.radioButtonUpload.Checked = true;
                     break;
             }
         }
 
-        private void SaveSettings()
+        private void SaveUserSettings()
         {
             Properties.Settings.Default.SshHost = this.textBoxHost.Text;
             Properties.Settings.Default.SshPort = (int)this.numericUpDownPort.Value;
@@ -353,69 +402,7 @@ namespace VhostManager
 
             Properties.Settings.Default.Save();
         }
-        #endregion
 
-        private void buttonConnexion_Click(object sender, EventArgs e)
-        {
-            this.SaveSettings();
-            this.LoadSshInfosAsync();
-        }
-
-        private void buttonAddSubDomain_Click(object sender, EventArgs e)
-        {
-            this.comboBoxSousDomaine.Items.Add(this.comboBoxSousDomaine.Text);
-            this.comboBoxSousDomaine.Text = string.Empty;
-        }
-
-        private void comboBoxSousDomaine_KeyDown(object sender, KeyEventArgs e)
-        {
-
-            if (e.KeyCode == Keys.Delete)
-            {
-                if (comboBoxSousDomaine.SelectedIndex >= 0 && comboBoxSousDomaine.Items.Count > 1)
-                    comboBoxSousDomaine.Items.RemoveAt(comboBoxSousDomaine.SelectedIndex);
-            }
-        }
-
-        private void tabControlMain_DrawItem(object sender, DrawItemEventArgs e)
-        {
-            // This event is called once for each tab button in your tab control
-            // First paint the background with a color based on the current tab
-
-            TabPage page = tabControlMain.TabPages[e.Index];           
-
-            // e.Index is the index of the tab in the TabPages collection.
-            if (page.Tag != null)
-            {
-                e.Graphics.FillRectangle(new SolidBrush(Color.Chocolate), e.Bounds);
-                Rectangle paddedBounds = e.Bounds;
-                int yOffset = (e.State == DrawItemState.Selected) ? -2 : 1;
-                paddedBounds.Offset(1, yOffset);
-                TextRenderer.DrawText(e.Graphics, page.Text, this.Font, paddedBounds, Color.White);
-            }
-            else
-            {
-                e.Graphics.FillRectangle(new SolidBrush(page.BackColor), e.Bounds);
-                Rectangle paddedBounds = e.Bounds;
-                int yOffset = (e.State == DrawItemState.Selected) ? -2 : 1;
-                paddedBounds.Offset(1, yOffset);
-                TextRenderer.DrawText(e.Graphics, page.Text, this.Font, paddedBounds, page.ForeColor);
-            }
-        }
-
-        protected override void WndProc(ref Message message)
-        {
-            if (message.Msg == SingleInstance.WM_SHOWFIRSTINSTANCE)
-            {
-                ShowWindow();
-            }
-            base.WndProc(ref message);
-        }
-
-        public void ShowWindow()
-        {
-            // Insert code here to make your form show itself.
-            WinApi.ShowToFront(this.Handle);
-        }
+        #endregion Parametres
     }
 }

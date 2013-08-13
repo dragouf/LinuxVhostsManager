@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Security;
 
 namespace VhostManager
@@ -8,18 +6,9 @@ namespace VhostManager
     /// <summary>
     /// encrypt and decrypt password or other strings
     /// </summary>
-    class SecurePassword
+    internal class SecurePassword
     {
-        static byte[] entropy = System.Text.Encoding.Unicode.GetBytes("Vhost manager super salty");
-
-        public static string EncryptString(System.Security.SecureString input)
-        {
-            byte[] encryptedData = System.Security.Cryptography.ProtectedData.Protect(
-                System.Text.Encoding.Unicode.GetBytes(ToInsecureString(input)),
-                entropy,
-                System.Security.Cryptography.DataProtectionScope.CurrentUser);
-            return Convert.ToBase64String(encryptedData);
-        }
+        private static byte[] entropy = System.Text.Encoding.Unicode.GetBytes("Vhost manager super salty");
 
         public static SecureString DecryptString(string encryptedData)
         {
@@ -37,15 +26,13 @@ namespace VhostManager
             }
         }
 
-        public static SecureString ToSecureString(string input)
+        public static string EncryptString(System.Security.SecureString input)
         {
-            SecureString secure = new SecureString();
-            foreach (char c in input)
-            {
-                secure.AppendChar(c);
-            }
-            secure.MakeReadOnly();
-            return secure;
+            byte[] encryptedData = System.Security.Cryptography.ProtectedData.Protect(
+                System.Text.Encoding.Unicode.GetBytes(ToInsecureString(input)),
+                entropy,
+                System.Security.Cryptography.DataProtectionScope.CurrentUser);
+            return Convert.ToBase64String(encryptedData);
         }
 
         public static string ToInsecureString(SecureString input)
@@ -61,6 +48,17 @@ namespace VhostManager
                 System.Runtime.InteropServices.Marshal.ZeroFreeBSTR(ptr);
             }
             return returnValue;
+        }
+
+        public static SecureString ToSecureString(string input)
+        {
+            SecureString secure = new SecureString();
+            foreach (char c in input)
+            {
+                secure.AppendChar(c);
+            }
+            secure.MakeReadOnly();
+            return secure;
         }
     }
 }

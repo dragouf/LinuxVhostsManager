@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VhostManager
 {
@@ -84,14 +82,45 @@ EOF", vhost.Nom, cheminVhost, serverAliases.ToFlatString()).Replace("\r\n", "\n"
             }
         }
 
-        public static string GetVhostsFolderSize(ConnectionInfo sshInfos)
+        public static void DeleteVhosts(string nomDomaine, ConnectionInfo sshInfos)
+        {
+            using (var client = new SshClient(sshInfos))
+            {
+                client.Connect();
+
+                // stop les services
+                client.RunCommand("service apache2 stop");
+
+                // Supprimes les dossiers
+                client.RunCommand(string.Format("rm -rf /var/www/vhosts/{0}/", nomDomaine));
+                client.RunCommand(string.Format("rm -f /etc/apache2/sites-enabled/{0}", nomDomaine));
+                client.RunCommand(string.Format("rm -f /etc/apache2/sites-available/{0}", nomDomaine));
+
+                // Redemarre les services
+                client.RunCommand("service apache2 start");
+
+                client.Disconnect();
+            }
+        }
+
+        public static string GetDiskSize(ConnectionInfo sshInfos)
         {
             string result = string.Empty;
 
             using (var client = new SshClient(sshInfos))
             {
                 client.Connect();
-                result = client.RunCommand("du -hs /var/www/vhosts/").Result.Replace("\n", "").Replace("/var/www/vhosts/","");
+                var reponse = client.RunCommand("df -h / |grep /dev/mapper/").Result.Replace("\n", "");
+
+                try
+                {
+                    var elements = reponse.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+
+                    result = elements[1];
+                    //result.Used = Convert.ToInt32(elements[2]);
+                }
+                catch { }
+
                 client.Disconnect();
             }
 
@@ -122,24 +151,14 @@ EOF", vhost.Nom, cheminVhost, serverAliases.ToFlatString()).Replace("\r\n", "\n"
             return result;
         }
 
-        public static string GetDiskSize(ConnectionInfo sshInfos)
+        public static string GetVhostsFolderSize(ConnectionInfo sshInfos)
         {
             string result = string.Empty;
 
             using (var client = new SshClient(sshInfos))
             {
                 client.Connect();
-                var reponse = client.RunCommand("df -h / |grep /dev/mapper/").Result.Replace("\n", "");
-
-                try
-                {
-                    var elements = reponse.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-
-                    result = elements[1];
-                    //result.Used = Convert.ToInt32(elements[2]);
-                }
-                catch { }
-
+                result = client.RunCommand("du -hs /var/www/vhosts/").Result.Replace("\n", "").Replace("/var/www/vhosts/", "");
                 client.Disconnect();
             }
 
@@ -153,17 +172,18 @@ EOF", vhost.Nom, cheminVhost, serverAliases.ToFlatString()).Replace("\r\n", "\n"
             using (var client = new SshClient(sshInfos))
             {
                 client.Connect();
-                
+
                 var resultat = client.RunCommand("ls -1 /etc/apache2/sites-available/");
-                
+
                 foreach (string vhostName in resultat.Result.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Where(v => !v.Contains("default")))
                 {
                     var cheminLocal = client.RunCommand(string.Format("cat /var/www/vhosts/{0}/conf/local", vhostName)).Result.Replace("\n", "");
                     var sousDomaines = client.RunCommand(string.Format("cat /var/www/vhosts/{0}/conf/sousdomaines", vhostName)).Result
-                        .Split(new char[] {'\n'}, StringSplitOptions.RemoveEmptyEntries)
+                        .Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
                         .ToList();
-                    
-                    listeVhosts.Add(new VhostDetails { 
+
+                    listeVhosts.Add(new VhostDetails
+                    {
                         Nom = vhostName,
                         CheminLocal = cheminLocal,
                         SousDomaines = sousDomaines
@@ -174,27 +194,6 @@ EOF", vhost.Nom, cheminVhost, serverAliases.ToFlatString()).Replace("\r\n", "\n"
             }
 
             return listeVhosts;
-        }
-
-        public static void DeleteVhosts(string nomDomaine, ConnectionInfo sshInfos)
-        {
-            using (var client = new SshClient(sshInfos))
-            {
-                client.Connect();
-
-                // stop les services
-                client.RunCommand("service apache2 stop");
-
-                // Supprimes les dossiers
-                client.RunCommand(string.Format("rm -rf /var/www/vhosts/{0}/", nomDomaine));
-                    client.RunCommand(string.Format("rm -f /etc/apache2/sites-enabled/{0}", nomDomaine));
-                client.RunCommand(string.Format("rm -f /etc/apache2/sites-available/{0}", nomDomaine));
-
-                // Redemarre les services
-                client.RunCommand("service apache2 start");
-
-                client.Disconnect();
-            }
         }
     }
 }

@@ -1,29 +1,62 @@
 ﻿using Microsoft.Synchronization;
 using Microsoft.Synchronization.Files;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VhostManager
 {
     public class SyncManager : IDisposable
     {
-        private FileSyncProvider SourceProvider { get; set; }
-        private FileSyncProvider TargetProvider { get; set; }
-        private SyncOrchestrator AgentOrcherstrator { get; set; }
-
-        private string UncPath { get; set; }
-        private string LocalPath { get; set; }
-
         public SyncManager(string localPath, string shareHost, string vhostDomainName)
         {
             this.UncPath = string.Format(@"\\{0}\vhosts\{1}\httpdocs", shareHost, vhostDomainName);
             this.LocalPath = localPath;
 
             InitializeSyncAgent();
+        }
+
+        private SyncOrchestrator AgentOrcherstrator { get; set; }
+
+        private string LocalPath { get; set; }
+
+        private FileSyncProvider SourceProvider { get; set; }
+
+        private FileSyncProvider TargetProvider { get; set; }
+
+        private string UncPath { get; set; }
+
+        public SyncOperationStatistics DetectChanges(string shareUsername, string sharePassword, SyncDirection syncDirection)
+        {
+            return SyncProvider(shareUsername, sharePassword, syncDirection, justStats: true);
+        }
+
+        public void Dispose()
+        {
+            if (AgentOrcherstrator != null)
+            {
+                if (AgentOrcherstrator.State != SyncOrchestratorState.Ready &&
+                    AgentOrcherstrator.State != SyncOrchestratorState.Canceled &&
+                    AgentOrcherstrator.State != SyncOrchestratorState.Canceling)
+                {
+                    AgentOrcherstrator.Cancel();
+                }
+            }
+
+            // Release resources
+            if (SourceProvider != null)
+            {
+                SourceProvider.Dispose();
+            }
+
+            if (TargetProvider != null)
+            {
+                TargetProvider.Dispose();
+            }
+        }
+
+        public SyncOperationStatistics Synchronize(string shareUsername, string sharePassword, SyncDirection syncDirection)
+        {
+            return SyncProvider(shareUsername, sharePassword, syncDirection, justStats: false);
         }
 
         private void InitializeSyncAgent()
@@ -43,22 +76,12 @@ namespace VhostManager
             this.AgentOrcherstrator.RemoteProvider = TargetProvider;
         }
 
-        public SyncOperationStatistics DetectChanges( string shareUsername, string sharePassword, SyncDirection syncDirection)
-        {
-            return SyncProvider(shareUsername, sharePassword, syncDirection, justStats: true);
-        }
-
-        public SyncOperationStatistics Synchronize(string shareUsername, string sharePassword, SyncDirection syncDirection)
-        {
-            return SyncProvider(shareUsername, sharePassword, syncDirection, justStats: false);
-        }
-
         private SyncOperationStatistics SyncProvider(string shareUsername, string sharePassword, SyncDirection syncDirection, bool justStats)
         {
             if (SourceProvider == null || TargetProvider == null || AgentOrcherstrator == null)
                 throw new Exception("La synchronisation n'a pas pu démarrer.");
 
-            SyncOperationStatistics stats = null;            
+            SyncOperationStatistics stats = null;
             var credentials = new NetworkCredential(shareUsername, sharePassword);
 
             try
@@ -69,16 +92,19 @@ namespace VhostManager
                     TargetProvider.PreviewMode = justStats;
 
                     //targetProvider.AppliedChange += new EventHandler<AppliedChangeEventArgs>(OnAppliedChange);
-                    //targetProvider.SkippedChange += new EventHandler<SkippedChangeEventArgs>(OnSkippedChange);                    
+                    //targetProvider.SkippedChange += new EventHandler<SkippedChangeEventArgs>(OnSkippedChange);
 
                     switch (syncDirection)
                     {
                         case SyncDirection.Upload: this.AgentOrcherstrator.Direction = SyncDirectionOrder.Upload;
                             break;
+
                         case SyncDirection.Download: this.AgentOrcherstrator.Direction = SyncDirectionOrder.Download;
                             break;
-                        case SyncDirection.Both: this.AgentOrcherstrator.Direction = SyncDirectionOrder.UploadAndDownload; // Sync source to destination      
+
+                        case SyncDirection.Both: this.AgentOrcherstrator.Direction = SyncDirectionOrder.UploadAndDownload; // Sync source to destination
                             break;
+
                         default: this.AgentOrcherstrator.Direction = SyncDirectionOrder.UploadAndDownload;
                             break;
                     }
@@ -100,31 +126,6 @@ namespace VhostManager
                 //{
                 //    TargetProvider.Dispose();
                 //}
-            }
-        }
-
-        public void Dispose()
-        {     
-            if (AgentOrcherstrator != null)
-            {
-                if (AgentOrcherstrator.State != SyncOrchestratorState.Ready &&
-                    AgentOrcherstrator.State != SyncOrchestratorState.Canceled &&
-                    AgentOrcherstrator.State != SyncOrchestratorState.Canceling)
-                {
-                    AgentOrcherstrator.Cancel();
-                }
-               
-            }
-
-            // Release resources
-            if (SourceProvider != null)
-            {
-                SourceProvider.Dispose();
-            }
-
-            if (TargetProvider != null)
-            {
-                TargetProvider.Dispose();
             }
         }
     }

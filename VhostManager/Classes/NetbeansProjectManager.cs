@@ -1,19 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VhostManager
 {
     public static class NetbeansProjectManager
     {
-        public static bool IsProjectExist(string localPath)
-        {
-            return File.Exists(string.Format(@"{0}\nbproject\project.xml", localPath));
-        }
-
         public static void CreateProject(string localPath, string domainName)
         {
             var projectXmlFile = AppDomain.CurrentDomain.BaseDirectory + "\\Resources\\nbproject\\project.new";
@@ -26,7 +17,7 @@ namespace VhostManager
             var projectXmlContent = File.ReadAllText(projectXmlFile);
             projectXmlContent = string.Format(projectXmlContent, domainName);
             File.WriteAllText(projectXmlFileGood, projectXmlContent);
-         
+
             var privatePropertiesContent = File.ReadAllText(privatePropertiesFile);
             privatePropertiesContent = string.Format(privatePropertiesContent, "http://www." + domainName);
             File.WriteAllText(privatePropertiesFileGood, privatePropertiesContent);
@@ -44,6 +35,11 @@ namespace VhostManager
             File.Copy(projectPropertiesFile, nbprojectFolder + "\\project.properties");
             File.Copy(privatePropertiesFileGood, nbprojectFolder + "\\private\\private.properties");
             File.Copy(privateXmlFile, nbprojectFolder + "\\private\\private.xml");
+        }
+
+        public static bool IsProjectExist(string localPath)
+        {
+            return File.Exists(string.Format(@"{0}\nbproject\project.xml", localPath));
         }
     }
 }

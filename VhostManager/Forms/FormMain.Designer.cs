@@ -103,7 +103,6 @@
             this.tabControlMain.SelectedIndex = 0;
             this.tabControlMain.Size = new System.Drawing.Size(788, 293);
             this.tabControlMain.TabIndex = 0;
-            this.tabControlMain.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.tabControlMain_DrawItem);
             // 
             // tabPageOptions
             // 

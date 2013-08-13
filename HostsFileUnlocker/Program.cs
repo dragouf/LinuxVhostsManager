@@ -1,27 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HostsFileUnlocker
 {
-    class Program
+    internal class Program
     {
         private static string HostFile = @"C:\Windows\System32\Drivers\etc\hosts";
 
         [DllImport("user32.dll")]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Console.WindowHeight = 10;
             Console.WindowWidth = 10;
@@ -56,5 +48,8 @@ namespace HostsFileUnlocker
 
             //Console.ReadLine();
         }
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     }
 }

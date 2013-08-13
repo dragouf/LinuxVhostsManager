@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace VhostManager
@@ -17,13 +10,13 @@ namespace VhostManager
         //    InitializeComponent();
         //}
 
-        public Brush BrushColor { get; set; }
-
         public ColorProgressBar()
         {
             this.SetStyle(ControlStyles.UserPaint, true);
             this.BrushColor = Brushes.Goldenrod;
         }
+
+        public Brush BrushColor { get; set; }
 
         protected override void OnPaint(PaintEventArgs e)
         {
