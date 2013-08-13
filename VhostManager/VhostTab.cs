@@ -41,11 +41,7 @@ namespace VhostManager
                 this.buttonSync.Invoke((MethodInvoker)(() =>
                 {
                     AnimateSyncButton(value);
-                    this.buttonSync.Enabled = !value;
-                    var toolTipSync = new ToolTip();
-                    toolTipSync.ShowAlways = true;
-                    string tipText = value ? "Sync. en cours..." : "Synchroniser le dossier local avec le vhost...";
-                    toolTipSync.SetToolTip(this.buttonSync, tipText);
+                    this.buttonSync.Enabled = !value;                    
                 }));
 
                 _IsSyncInProgress = value;
@@ -78,6 +74,7 @@ namespace VhostManager
                     _LocalFolderWatcher = new FileSystemWatcher();
 
                     _LocalFolderWatcher.Path = this.VhostInfo.CheminLocal;
+                    _LocalFolderWatcher.IncludeSubdirectories = true;
                     _LocalFolderWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
                     _LocalFolderWatcher.Filter = "*.*";
                     _LocalFolderWatcher.Changed += new FileSystemEventHandler(LocalFileChanged);
@@ -90,25 +87,28 @@ namespace VhostManager
             }
         }
 
-        private FileWatcher _FileSync;
-        private FileWatcher FileSync
+        private InstantCopier _FileSync;
+        private InstantCopier FileSync
         {
             get
             {
                 if (_FileSync == null)
                 {
-                    _FileSync = new FileWatcher(this.VhostInfo.CheminLocal, this.UncPathBase, this.SSHConnectionInfos.Username, this.ConnexionPassword);
+                    _FileSync = new InstantCopier(this.VhostInfo.CheminLocal, this.UncPathBase, this.SSHConnectionInfos.Username, this.ConnexionPassword);
                 }
 
                 return _FileSync;
             }
         }
+        
         public event VhostDeletedDelegate VhostDeleted;
         public delegate void VhostDeletedDelegate();
 
         private SyncManager SyncManagerVhost { get; set; }
 
         private FormLogs LogsForm { get; set; }
+
+        private List<KeyValuePair<DateTime, string>> SyncHistory { get; set; }
 
         public VhostTab(VhostDetails vhostDetails, ConnectionInfo sshInfo, string sshPassword, FormMain parentForm)
         {
@@ -117,9 +117,14 @@ namespace VhostManager
             this.VhostInfo = vhostDetails;
             this.SSHConnectionInfos = sshInfo;
             this.ConnexionPassword = sshPassword;
-            //toolTipSync.SetToolTip(this.buttonSync, string.Empty);
-
+            this.SyncHistory = new List<KeyValuePair<DateTime, string>>();
             StartLoadingIfValid();
+
+            // Tooltip bouton de sync.
+            var toolTipSync = new ToolTip();
+            toolTipSync.ShowAlways = true;
+            string tipText = "Synchroniser le dossier local avec le vhost...";
+            toolTipSync.SetToolTip(this.buttonSync, tipText);
         }
 
         private void LoadDetails()
@@ -161,16 +166,24 @@ namespace VhostManager
             var bw = new BackgroundWorker();
 
             var syncDirection = this.MainForm.SyncDirection;
+            this.SyncHistory.Add(new KeyValuePair<DateTime,string>(DateTime.Now, "Début de calcul..."));
 
             // DEMARRE
             bw.DoWork += (s, args) =>
             {
                 try
                 {
-                    statsSync = this.SyncManagerVhost.DetectChanges(
-                        this.SSHConnectionInfos.Username,
-                        this.ConnexionPassword,
-                        syncDirection);
+                    if (this.SyncManagerVhost != null)
+                    {
+                        statsSync = this.SyncManagerVhost.DetectChanges(
+                            this.SSHConnectionInfos.Username,
+                            this.ConnexionPassword,
+                            syncDirection);
+                    }
+                    else
+                    {
+                        errorMessage = "La synchronisation n'a pas pu démarrer.";
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -194,9 +207,12 @@ namespace VhostManager
                         labelSync.ForeColor = Color.Green;
                         labelSync.Text = string.Format("Synchronisé!");
                     }
+
+                    this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Fin de calcul. {0} fichiers a sync.", nombreChangements)));
                 }
                 else
                 {
+                    this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Fin de calcul. Erreur")));
                     labelSync.ForeColor = Color.Red;
                     labelSync.Text = string.Format("Dossier en cours de sync. par un autre utilisateur!");
                     this.MainForm.StatusBarLabel.ForeColor = Color.Red;
@@ -231,12 +247,11 @@ namespace VhostManager
             //    AnimateSyncButton(true);
             //    this.buttonSync.Enabled = false;
             //}));
+            this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Debut de synchronisation")));
 
             var syncDirection = this.MainForm.SyncDirection;
             Microsoft.Synchronization.SyncOperationStatistics statsSync = null;
             var bw = new BackgroundWorker();
-
-
 
             // DEMARRE
             bw.DoWork += (s, args) =>
@@ -278,6 +293,8 @@ namespace VhostManager
                         }));
                     }
 
+                    this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Fin de Sync. {0} fichiers non synchronisés", nombreChangements)));
+
                     //this.buttonSync.Invoke((MethodInvoker)(() =>
                     //{
                     //    AnimateSyncButton(false);
@@ -286,6 +303,7 @@ namespace VhostManager
                 }
                 else
                 {
+                    this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Fin de Syn. Erreur")));
                     labelSync.ForeColor = Color.Red;
                     labelSync.Text = string.Format("Dossier en cours de sync. par un autre utilisateur!");
                     this.MainForm.StatusBarLabel.ForeColor = Color.Red;
@@ -400,7 +418,29 @@ namespace VhostManager
 
         private void buttonSync_Click(object sender, EventArgs e)
         {
-            this.StartSync();
+            bool isOk = true;
+            string errorMessage = string.Empty;
+
+            if (this.SyncManagerVhost == null)
+            {
+                try
+                {
+                    this.SyncManagerVhost = new SyncManager(this.VhostInfo.CheminLocal, this.SSHConnectionInfos.Host, this.VhostInfo.Nom);
+                }
+                catch (Exception ex)
+                {
+                    isOk = false;
+                    errorMessage = "La synchronisation n'a pas pu démarrer : " + ex.Message;
+                }
+            }
+
+            if (isOk)
+                this.StartSync();
+            else
+            {
+                this.MainForm.StatusBarLabel.ForeColor = Color.Red;
+                this.MainForm.StatusBarLabel.Text = errorMessage.Replace(Environment.NewLine, "");
+            }
         }
 
         private void AnimateSyncButton(bool start)
@@ -454,6 +494,8 @@ namespace VhostManager
                 {
                     try
                     {
+                        this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Replication instantanée: {0} de {1}", e.ChangeType.ToString(), e.Name)));
+                        bool isDone = true;
                         switch (e.ChangeType)
                         {
                             //case WatcherChangeTypes.All:
@@ -471,22 +513,39 @@ namespace VhostManager
                                 this.FileSync.RenameFile((RenamedEventArgs)e);
                                 break;
                             default:
-                                this.labelSync.Invoke((MethodInvoker)(() =>
-                                {
-                                    //this.buttonSync.Visible = true;
-                                    this.labelSync.ForeColor = Color.Red;
-                                    this.labelSync.Text = "Fichiers non synchronisés!";
-                                }));
+                                isDone = false;                                
                                 break;
                         }
+
+                        if (isDone)
+                        {
+                            this.labelSync.Invoke((MethodInvoker)(() =>
+                            {
+                                this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Replication instantanée terminée : {0}", e.Name)));
+                                //this.buttonSync.Visible = true;
+                                this.labelSync.ForeColor = Color.Orange;
+                                this.labelSync.Text = "Replication instantanée effectuée !";
+                            }));
+                        }
+                        else
+                        {
+                            this.labelSync.Invoke((MethodInvoker)(() =>
+                            {
+                                this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Replication instantanée échouée : {0}", e.Name)));
+                                //this.buttonSync.Visible = true;
+                                this.labelSync.ForeColor = Color.Red;
+                                this.labelSync.Text = "Replication instantanée échouée!";
+                            }));
+                        }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         this.labelSync.Invoke((MethodInvoker)(() =>
                         {
+                            this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Replication instantanée échouée : ", ex.Message)));
                             //this.buttonSync.Visible = true;
                             this.labelSync.ForeColor = Color.Red;
-                            this.labelSync.Text = "Fichiers non synchronisés!";
+                            this.labelSync.Text = "Replication instantanée échouée!";
                         }));
                     }
                 }
@@ -690,6 +749,12 @@ namespace VhostManager
             this.LogsForm.Show();
             this.LogsForm.StartPosition = FormStartPosition.CenterScreen;
             this.LogsForm.BringToFront();
+        }
+
+        private void linkLabelHistory_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var dialog = new SyncHistoryForm(this.SyncHistory, this.VhostInfo.Nom);
+            dialog.ShowDialog();
         }
     }
 }

@@ -31,7 +31,7 @@
     <PublisherName>Web Alliance</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>24</ApplicationRevision>
+    <ApplicationRevision>33</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -107,7 +107,7 @@
     <Compile Include="Classes\LogWatcher.cs" />
     <Compile Include="Classes\NetbeansProjectManager.cs" />
     <Compile Include="Classes\SecurePassword.cs" />
-    <Compile Include="Classes\FileWatcher.cs" />
+    <Compile Include="Classes\InstantCopier.cs" />
     <Compile Include="ColorProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -134,6 +134,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classes\VhostsFileManager.cs" />
     <Compile Include="SyncDirectionEnum.cs" />
+    <Compile Include="SyncHistoryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SyncHistoryForm.Designer.cs">
+      <DependentUpon>SyncHistoryForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="VhostTab.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -156,6 +162,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SyncHistoryForm.resx">
+      <DependentUpon>SyncHistoryForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="VhostTab.resx">
       <DependentUpon>VhostTab.cs</DependentUpon>
     </EmbeddedResource>
@@ -223,6 +232,7 @@
     <Content Include="Resources\sync2.png" />
     <Content Include="Resources\sync3.png" />
     <Content Include="Resources\sync4.png" />
+    <Content Include="Resources\system_monitoring.ico" />
     <Content Include="Resources\warning_error.png" />
   </ItemGroup>
   <ItemGroup>

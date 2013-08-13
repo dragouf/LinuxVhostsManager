@@ -28,7 +28,7 @@ namespace VhostManager
             File.WriteAllText(projectXmlFileGood, projectXmlContent);
          
             var privatePropertiesContent = File.ReadAllText(privatePropertiesFile);
-            privatePropertiesContent = string.Format(privatePropertiesContent, "www." + domainName);
+            privatePropertiesContent = string.Format(privatePropertiesContent, "http://www." + domainName);
             File.WriteAllText(privatePropertiesFileGood, privatePropertiesContent);
 
             // cree les dossiers

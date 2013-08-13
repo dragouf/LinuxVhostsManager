@@ -19,7 +19,7 @@ using System.Linq;
 
 namespace VhostManager
 {
-    public class FileWatcher
+    public class InstantCopier
     {
         private string UncPassword { get; set; }
         private string UncUsername { get; set; }
@@ -37,7 +37,7 @@ namespace VhostManager
         //public static extern bool SetFileTime(IntPtr hFile, ref long lpCreationTime, ref long lpLastAccessTime, ref long lpLastWriteTime);
         //private const Int64 fileTimeUnchanged = 0xFFFFFFFF;
 
-        public FileWatcher(string localPath, string uncPath, string uncUsername, string uncPassword)
+        public InstantCopier(string localPath, string uncPath, string uncUsername, string uncPassword)
         {
             this.LocalPath = localPath;
             this.UncPath = uncPath;

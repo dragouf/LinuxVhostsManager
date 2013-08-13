@@ -16,68 +16,97 @@ namespace VhostManager
         private LogWatcher Watcher { get; set; }
         public string VhostName { get; set; }
 
+        public bool IsRefreshing { get; set; }
+
         public FormLogs(string nomVhost, ConnectionInfo sshInfos)
         {
             InitializeComponent();
-            this.Text = this.Text + nomVhost;
+            this.IsRefreshing = false;
+            this.Text = nomVhost + this.Text;
             this.VhostName = nomVhost;
             bool isConnected = false;
             this.Watcher = new LogWatcher(sshInfos, out isConnected);
             if (isConnected)
-                this.timerRefresh.Enabled = true;
+            {
+                this.timerRefresh.Start();
+                //this.timerRefresh.Enabled = true;
+            }
         }
 
         private void timerRefresh_Tick(object sender, EventArgs e)
         {
-            string newErrorLog = string.Empty;
-            string newAccessLog = string.Empty;
-            string newRewriteLog = string.Empty;
-            string newGlobalErrorLog = string.Empty;
-
-            var bw = new BackgroundWorker();
-            // DEMARRE
-            bw.DoWork += (s, args) =>
+            if (!IsRefreshing)
             {
-                newErrorLog = this.Watcher.GetVhostErrorLog(this.VhostName);
-                newAccessLog = this.Watcher.GetVhostAccessLog(this.VhostName);
-                newRewriteLog = this.Watcher.GetVhostRewriteLog(this.VhostName);
-                newGlobalErrorLog = this.Watcher.GetGlobalErrorLog();
-            };
+                string newErrorLog = string.Empty;
+                string newAccessLog = string.Empty;
+                string newRewriteLog = string.Empty;
+                string newGlobalErrorLog = string.Empty;
 
-            // TERMINE
-            bw.RunWorkerCompleted += (s, args) =>
-            {
-                string oldErrorLog = this.textBoxError.Text;
-                if (newErrorLog != oldErrorLog)
+                bool isOK = true;
+                this.IsRefreshing = true;
+
+                var bw = new BackgroundWorker();
+                // DEMARRE
+                bw.DoWork += (s, args) =>
                 {
-                    this.textBoxError.Text = newErrorLog;
-                    ScrollDownTextBox(this.textBoxError);
-                }
+                    try
+                    {
+                        newErrorLog = this.Watcher.GetVhostErrorLog(this.VhostName);
+                        newAccessLog = this.Watcher.GetVhostAccessLog(this.VhostName);
+                        newRewriteLog = this.Watcher.GetVhostRewriteLog(this.VhostName);
+                        newGlobalErrorLog = this.Watcher.GetGlobalErrorLog();
+                    }
+                    catch
+                    {
+                        if (!this.Watcher.TryConnect())
+                        {
+                            isOK = false;
+                            this.timerRefresh.Stop();
+                            MessageBox.Show(this, "Les mises a jour ne se font plus.\r\n Tentez de fermer la fenetre et de la reouvrir pour relancer le rafraichissement.", "Erreur de connexion SSH", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
+                };
 
-                string oldAccessLog = this.textBoxAcces.Text;
-                if (newAccessLog != oldAccessLog)
+                // TERMINE
+                bw.RunWorkerCompleted += (s, args) =>
                 {
-                    this.textBoxAcces.Text = newAccessLog;
-                    ScrollDownTextBox(this.textBoxAcces);
-                }
+                    if (isOK)
+                    {
+                        string oldErrorLog = this.textBoxError.Text;
+                        if (newErrorLog != oldErrorLog)
+                        {
+                            this.textBoxError.Text = newErrorLog;
+                            ScrollDownTextBox(this.textBoxError);
+                        }
 
-                string oldRewriteLog = this.textBoxRewriteLogs.Text;
-                if (newRewriteLog != oldRewriteLog)
-                {
-                    this.textBoxRewriteLogs.Text = newRewriteLog;
-                    ScrollDownTextBox(this.textBoxRewriteLogs);
-                }
+                        string oldAccessLog = this.textBoxAcces.Text;
+                        if (newAccessLog != oldAccessLog)
+                        {
+                            this.textBoxAcces.Text = newAccessLog;
+                            ScrollDownTextBox(this.textBoxAcces);
+                        }
 
-                string oldGlobalAccessLog = this.textBoxErrorGlobal.Text;
-                if (newGlobalErrorLog != oldGlobalAccessLog)
-                {
-                    this.textBoxErrorGlobal.Text = newGlobalErrorLog;
-                    ScrollDownTextBox(this.textBoxErrorGlobal);
-                }
-            };
+                        string oldRewriteLog = this.textBoxRewriteLogs.Text;
+                        if (newRewriteLog != oldRewriteLog)
+                        {
+                            this.textBoxRewriteLogs.Text = newRewriteLog;
+                            ScrollDownTextBox(this.textBoxRewriteLogs);
+                        }
 
-            // LANCE
-            bw.RunWorkerAsync();
+                        string oldGlobalAccessLog = this.textBoxErrorGlobal.Text;
+                        if (newGlobalErrorLog != oldGlobalAccessLog)
+                        {
+                            this.textBoxErrorGlobal.Text = newGlobalErrorLog;
+                            ScrollDownTextBox(this.textBoxErrorGlobal);
+                        }
+                    }
+
+                    this.IsRefreshing = false;
+                };
+
+                // LANCE
+                bw.RunWorkerAsync();
+            }
         }
 
         private void FormLogs_FormClosing(object sender, FormClosingEventArgs e)

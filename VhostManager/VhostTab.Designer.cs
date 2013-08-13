@@ -16,6 +16,10 @@
             if (disposing && (components != null))
             {
                 components.Dispose();
+                AnimationTimer.Stop();
+                this.LocalFolderWatcher.EnableRaisingEvents = false;
+                this.LocalFolderWatcher.Dispose();
+                this.SyncManagerVhost.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -49,6 +53,7 @@
             this.panelUnlockHost = new System.Windows.Forms.Panel();
             this.linkLabelNetBeans = new System.Windows.Forms.LinkLabel();
             this.linkLabelLog = new System.Windows.Forms.LinkLabel();
+            this.linkLabelHistory = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxHostsWarn)).BeginInit();
             this.panelUnlockHost.SuspendLayout();
             this.SuspendLayout();
@@ -214,7 +219,7 @@
             // pictureBoxHostsWarn
             // 
             this.pictureBoxHostsWarn.Image = global::VhostManager.Properties.Resources.warning_error;
-            this.pictureBoxHostsWarn.Location = new System.Drawing.Point(4, 2);
+            this.pictureBoxHostsWarn.Location = new System.Drawing.Point(8, 3);
             this.pictureBoxHostsWarn.Name = "pictureBoxHostsWarn";
             this.pictureBoxHostsWarn.Size = new System.Drawing.Size(16, 16);
             this.pictureBoxHostsWarn.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -250,16 +255,16 @@
             // 
             this.panelUnlockHost.Controls.Add(this.linkLabelUnlockHosts);
             this.panelUnlockHost.Controls.Add(this.pictureBoxHostsWarn);
-            this.panelUnlockHost.Location = new System.Drawing.Point(436, 50);
+            this.panelUnlockHost.Location = new System.Drawing.Point(164, 46);
             this.panelUnlockHost.Name = "panelUnlockHost";
-            this.panelUnlockHost.Size = new System.Drawing.Size(170, 22);
+            this.panelUnlockHost.Size = new System.Drawing.Size(211, 22);
             this.panelUnlockHost.TabIndex = 19;
             this.panelUnlockHost.Visible = false;
             // 
             // linkLabelNetBeans
             // 
             this.linkLabelNetBeans.AutoSize = true;
-            this.linkLabelNetBeans.Location = new System.Drawing.Point(168, 162);
+            this.linkLabelNetBeans.Location = new System.Drawing.Point(165, 162);
             this.linkLabelNetBeans.Name = "linkLabelNetBeans";
             this.linkLabelNetBeans.Size = new System.Drawing.Size(105, 13);
             this.linkLabelNetBeans.TabIndex = 20;
@@ -270,18 +275,31 @@
             // linkLabelLog
             // 
             this.linkLabelLog.AutoSize = true;
-            this.linkLabelLog.Location = new System.Drawing.Point(391, 52);
+            this.linkLabelLog.Location = new System.Drawing.Point(390, 50);
             this.linkLabelLog.Name = "linkLabelLog";
-            this.linkLabelLog.Size = new System.Drawing.Size(30, 13);
+            this.linkLabelLog.Size = new System.Drawing.Size(68, 13);
             this.linkLabelLog.TabIndex = 21;
             this.linkLabelLog.TabStop = true;
-            this.linkLabelLog.Text = "Logs";
+            this.linkLabelLog.Text = "Logs Monitor";
             this.linkLabelLog.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelLog_LinkClicked);
+            // 
+            // linkLabelHistory
+            // 
+            this.linkLabelHistory.AutoSize = true;
+            this.linkLabelHistory.Font = new System.Drawing.Font("Calibri Light", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.linkLabelHistory.Location = new System.Drawing.Point(439, 125);
+            this.linkLabelHistory.Name = "linkLabelHistory";
+            this.linkLabelHistory.Size = new System.Drawing.Size(53, 13);
+            this.linkLabelHistory.TabIndex = 22;
+            this.linkLabelHistory.TabStop = true;
+            this.linkLabelHistory.Text = "Historique";
+            this.linkLabelHistory.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelHistory_LinkClicked);
             // 
             // VhostTab
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.linkLabelHistory);
             this.Controls.Add(this.linkLabelLog);
             this.Controls.Add(this.linkLabelNetBeans);
             this.Controls.Add(this.panelUnlockHost);
@@ -334,5 +352,6 @@
         private System.Windows.Forms.Panel panelUnlockHost;
         private System.Windows.Forms.LinkLabel linkLabelNetBeans;
         private System.Windows.Forms.LinkLabel linkLabelLog;
+        private System.Windows.Forms.LinkLabel linkLabelHistory;
     }
 }

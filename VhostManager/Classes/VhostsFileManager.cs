@@ -105,7 +105,7 @@ EOF", vhost.Nom, cheminVhost, serverAliases.ToFlatString()).Replace("\r\n", "\n"
             using (var client = new SshClient(sshInfos))
             {
                 client.Connect();
-                var reponse = client.RunCommand("df /dev/sda1 |grep sda").Result.Replace("\n", "");
+                var reponse = client.RunCommand("df / |grep /dev/mapper/").Result.Replace("\n", "");
 
                 try
                 {
@@ -113,6 +113,30 @@ EOF", vhost.Nom, cheminVhost, serverAliases.ToFlatString()).Replace("\r\n", "\n"
 
                     result.Total = Convert.ToInt32(elements[1]);
                     result.Used = Convert.ToInt32(elements[2]);
+                }
+                catch { }
+
+                client.Disconnect();
+            }
+
+            return result;
+        }
+
+        public static string GetDiskSize(ConnectionInfo sshInfos)
+        {
+            string result = string.Empty;
+
+            using (var client = new SshClient(sshInfos))
+            {
+                client.Connect();
+                var reponse = client.RunCommand("df -h / |grep /dev/mapper/").Result.Replace("\n", "");
+
+                try
+                {
+                    var elements = reponse.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+
+                    result = elements[1];
+                    //result.Used = Convert.ToInt32(elements[2]);
                 }
                 catch { }
 

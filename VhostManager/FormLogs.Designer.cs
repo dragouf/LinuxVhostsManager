@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormLogs));
             this.timerRefresh = new System.Windows.Forms.Timer(this.components);
             this.groupBoxVhostAccess = new System.Windows.Forms.GroupBox();
             this.textBoxAcces = new System.Windows.Forms.TextBox();
@@ -190,10 +191,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1368, 802);
             this.Controls.Add(this.tableLayoutPanelGlobal);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormLogs";
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.Text = "Monitoring des logs de ";
+            this.Text = " : monitoring des logs";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormLogs_FormClosing);
             this.groupBoxVhostAccess.ResumeLayout(false);
             this.groupBoxVhostAccess.PerformLayout();

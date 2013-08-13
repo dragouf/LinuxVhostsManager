@@ -10,19 +10,37 @@ namespace VhostManager
     class LogWatcher : IDisposable
     {
         private SshClient ClientConnection { get; set; }
-        public LogWatcher(ConnectionInfo sshInfos, out bool isConnected)
-        {
-            isConnected = true;
+        private ConnectionInfo SshInfos { get; set; }
 
-            try
+        public LogWatcher(ConnectionInfo sshInfos, out bool isConnected)
+        {            
+            this.SshInfos = sshInfos;
+            isConnected = TryConnect();
+        }
+
+        public bool TryConnect()
+        {
+            bool isConnected = true;
+
+            if (this.ClientConnection == null || !this.ClientConnection.IsConnected)
             {
-                this.ClientConnection = new SshClient(sshInfos);
+                try
+                {
+                    this.ClientConnection = new SshClient(SshInfos);
+                    this.ClientConnection.Connect();
+                }
+                catch
+                {
+                    isConnected = false;
+                }
+            }
+            else if(this.ClientConnection.IsConnected)
+            {
+                this.ClientConnection.Disconnect();                
                 this.ClientConnection.Connect();
             }
-            catch
-            {
-                isConnected = false;
-            }
+
+            return isConnected;
         }
 
         public string GetVhostErrorLog(string vhostName)

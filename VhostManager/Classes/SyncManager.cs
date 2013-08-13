@@ -55,6 +55,9 @@ namespace VhostManager
 
         private SyncOperationStatistics SyncProvider(string shareUsername, string sharePassword, SyncDirection syncDirection, bool justStats)
         {
+            if (SourceProvider == null || TargetProvider == null || AgentOrcherstrator == null)
+                throw new Exception("La synchronisation n'a pas pu démarrer.");
+
             SyncOperationStatistics stats = null;            
             var credentials = new NetworkCredential(shareUsername, sharePassword);
 
@@ -101,7 +104,18 @@ namespace VhostManager
         }
 
         public void Dispose()
-        {
+        {     
+            if (AgentOrcherstrator != null)
+            {
+                if (AgentOrcherstrator.State != SyncOrchestratorState.Ready &&
+                    AgentOrcherstrator.State != SyncOrchestratorState.Canceled &&
+                    AgentOrcherstrator.State != SyncOrchestratorState.Canceling)
+                {
+                    AgentOrcherstrator.Cancel();
+                }
+               
+            }
+
             // Release resources
             if (SourceProvider != null)
             {

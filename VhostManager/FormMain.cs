@@ -74,6 +74,7 @@ namespace VhostManager
             var listeVhosts = new List<VhostDetails>();
             string tailleVhosts = string.Empty;
             var hddInfos = new HddSpaceInfos();
+            string hddSize = "-1Go";
 
             toolStripStatusLabelEtat.ForeColor = Color.Orange;
             toolStripStatusLabelEtat.Text = "Collecte des données distantes en cours...";
@@ -91,6 +92,7 @@ namespace VhostManager
                     {
                         tailleVhosts = VhostsFileManager.GetVhostsFolderSize(this.SSHConnectionInfos);
                         hddInfos = VhostsFileManager.GetDiskUsageInfo(this.SSHConnectionInfos);
+                        hddSize = VhostsFileManager.GetDiskSize(this.SSHConnectionInfos);
                     }
                     catch { }
                 }
@@ -109,9 +111,13 @@ namespace VhostManager
 
                     // Affiche les donnees linux
                     this.labelTailleVhosts.Text = tailleVhosts;
-                    this.progressBarFreeSpace.Maximum = hddInfos.Total;
-                    this.progressBarFreeSpace.Value = hddInfos.Used;
-                    this.progressBarFreeSpace.BrushColor = (hddInfos.Used * 100 / hddInfos.Total) < 85 ? Brushes.Green : Brushes.Red;
+                    if (hddInfos.Total > 0)
+                    {
+                        this.labelMaxHddSize.Text = hddSize;
+                        this.progressBarFreeSpace.Maximum = hddInfos.Total;
+                        this.progressBarFreeSpace.Value = hddInfos.Used;
+                        this.progressBarFreeSpace.BrushColor = (hddInfos.Used * 100 / hddInfos.Total) < 85 ? Brushes.Green : Brushes.Red;
+                    }
 
                     //Affichage temporaire d'un message de succes 
                     toolStripStatusLabelEtat.ForeColor = Color.Green;
@@ -149,6 +155,7 @@ namespace VhostManager
 
                     var vhostTab = new VhostTab(vhost, this.SSHConnectionInfos, this.textBoxPassword.Text, parentForm: this);
                     vhostTab.Dock = DockStyle.Fill;
+                    //vhostTab.ForeColor = Color.Brown;
                     vhostTab.VhostDeleted += () => { this.LoadSshInfosAsync(); };
                     tab.Controls.Add(vhostTab);
 
@@ -368,6 +375,47 @@ namespace VhostManager
                 if (comboBoxSousDomaine.SelectedIndex >= 0 && comboBoxSousDomaine.Items.Count > 1)
                     comboBoxSousDomaine.Items.RemoveAt(comboBoxSousDomaine.SelectedIndex);
             }
+        }
+
+        private void tabControlMain_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            // This event is called once for each tab button in your tab control
+            // First paint the background with a color based on the current tab
+
+            TabPage page = tabControlMain.TabPages[e.Index];           
+
+            // e.Index is the index of the tab in the TabPages collection.
+            if (page.Tag != null)
+            {
+                e.Graphics.FillRectangle(new SolidBrush(Color.Chocolate), e.Bounds);
+                Rectangle paddedBounds = e.Bounds;
+                int yOffset = (e.State == DrawItemState.Selected) ? -2 : 1;
+                paddedBounds.Offset(1, yOffset);
+                TextRenderer.DrawText(e.Graphics, page.Text, this.Font, paddedBounds, Color.White);
+            }
+            else
+            {
+                e.Graphics.FillRectangle(new SolidBrush(page.BackColor), e.Bounds);
+                Rectangle paddedBounds = e.Bounds;
+                int yOffset = (e.State == DrawItemState.Selected) ? -2 : 1;
+                paddedBounds.Offset(1, yOffset);
+                TextRenderer.DrawText(e.Graphics, page.Text, this.Font, paddedBounds, page.ForeColor);
+            }
+        }
+
+        protected override void WndProc(ref Message message)
+        {
+            if (message.Msg == SingleInstance.WM_SHOWFIRSTINSTANCE)
+            {
+                ShowWindow();
+            }
+            base.WndProc(ref message);
+        }
+
+        public void ShowWindow()
+        {
+            // Insert code here to make your form show itself.
+            WinApi.ShowToFront(this.Handle);
         }
     }
 }
