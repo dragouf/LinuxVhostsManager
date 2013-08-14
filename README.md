@@ -1,7 +1,7 @@
 LinuxVhostsManager
 ==================
 
-Help to manage vhosts on ubuntu server and synchronise file from a local folder
+Help to manage apache 2 vhosts on ubuntu server, synchronize files between local/dev server and monitor logs in real time.
 
 ##What you can do
 
