@@ -31,7 +31,7 @@ Help to manage apache 2 vhosts on ubuntu server, synchronize files between local
 sudo a2enmod rewrite
 ```
 
-**Install mod_rewrite**
+**Install samba**
 
 ```
 sudo apt-get install samba
