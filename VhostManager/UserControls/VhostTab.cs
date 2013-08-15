@@ -125,7 +125,19 @@ namespace VhostManager
 
         private List<KeyValuePair<DateTime, string>> SyncHistory { get; set; }
 
-        private SyncManager SyncManagerVhost { get; set; }
+        private SyncManager _syncManager;
+
+        private SyncManager SyncManagerVhost
+        {
+            get
+            {
+                if (_syncManager == null)
+                {
+                    _syncManager = new SyncManager(this.VhostInfo.CheminLocal, this.SSHConnectionInfos.Host, this.VhostInfo.Nom);
+                }
+                return _syncManager;
+            }
+        }
 
         private VhostDetails VhostInfo { get; set; }
         #endregion
@@ -189,12 +201,6 @@ namespace VhostManager
                 {
                     errorMessage = ex.Message;
                     isDistantValid = false;
-                }
-
-                if (isLocalValid && isDistantValid)
-                {
-                    this.SyncManagerVhost = new SyncManager(this.VhostInfo.CheminLocal, this.SSHConnectionInfos.Host, this.VhostInfo.Nom);
-                    //this.SyncManagerVhost.SessionProgress += SyncManagerVhost_SessionProgress;
                 }
             };
 
@@ -453,11 +459,6 @@ namespace VhostManager
                 labelSync.Text = string.Format("En cours de synchronisation...");
             }));
 
-            //this.buttonSync.Invoke((MethodInvoker)(() =>
-            //{
-            //    AnimateSyncButton(true);
-            //    this.buttonSync.Enabled = false;
-            //}));
             this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Debut de synchronisation")));
 
             var syncDirection = this.MainForm.SyncDirection;
@@ -500,17 +501,10 @@ namespace VhostManager
                         {
                             labelSync.ForeColor = Color.Green;
                             labelSync.Text = string.Format("Synchronisé!");
-                            //toolTipSync.SetToolTip(this.buttonSync, string.Empty);
                         }));
                     }
 
                     this.SyncHistory.Add(new KeyValuePair<DateTime, string>(DateTime.Now, string.Format("Fin de Sync. {0} fichiers non synchronisés", nombreChangements)));
-
-                    //this.buttonSync.Invoke((MethodInvoker)(() =>
-                    //{
-                    //    AnimateSyncButton(false);
-                    //    this.buttonSync.Enabled = true;
-                    //}));
                 }
                 else
                 {
@@ -566,21 +560,14 @@ namespace VhostManager
             {
                 try
                 {
-                    if (this.SyncManagerVhost != null)
-                    {
-                        statsSync = this.SyncManagerVhost.DetectChanges(
-                            this.SSHConnectionInfos.Username,
-                            this.ConnexionPassword,
-                            syncDirection);
-                    }
-                    else
-                    {
-                        errorMessage = "La synchronisation n'a pas pu démarrer.";
-                    }
+                    statsSync = this.SyncManagerVhost.DetectChanges(
+                        this.SSHConnectionInfos.Username,
+                        this.ConnexionPassword,
+                        syncDirection);
                 }
                 catch (Exception ex)
                 {
-                    errorMessage = ex.Message;
+                    errorMessage = "Le synchronisation n'a pas pu démarrer : " + ex.Message;
                 }
             };
 
@@ -625,28 +612,16 @@ namespace VhostManager
 
         private void buttonSync_Click(object sender, EventArgs e)
         {
-            bool isOk = true;
-            string errorMessage = string.Empty;
+            string errorMessage = "La synchronisation n'a pas pu démarrer : ";
 
-            if (this.SyncManagerVhost == null)
+            try
             {
-                try
-                {
-                    this.SyncManagerVhost = new SyncManager(this.VhostInfo.CheminLocal, this.SSHConnectionInfos.Host, this.VhostInfo.Nom);
-                }
-                catch (Exception ex)
-                {
-                    isOk = false;
-                    errorMessage = "La synchronisation n'a pas pu démarrer : " + ex.Message;
-                }
-            }
-
-            if (isOk)
                 this.StartSync();
-            else
+            }
+            catch (Exception ex)
             {
                 this.MainForm.StatusBarLabel.ForeColor = Color.Red;
-                this.MainForm.StatusBarLabel.Text = errorMessage.Replace(Environment.NewLine, "");
+                this.MainForm.StatusBarLabel.Text = (errorMessage + ex.Message).Replace(Environment.NewLine, "");
             }
         }
 

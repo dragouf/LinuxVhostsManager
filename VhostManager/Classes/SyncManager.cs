@@ -41,9 +41,9 @@ namespace VhostManager
         private void InitializeSyncAgent()
         {
             // Set options for the sync operation
-            FileSyncOptions options = FileSyncOptions.CompareFileStreams;
+            var options = FileSyncOptions.CompareFileStreams;
 
-            FileSyncScopeFilter filter = new FileSyncScopeFilter();
+            var filter = new FileSyncScopeFilter();
             filter.FileNameExcludes.Add("*.lnk"); // Exclude all *.lnk files
             filter.FileNameExcludes.Add("Thumbs.db");
 

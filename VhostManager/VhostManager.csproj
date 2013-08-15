@@ -31,7 +31,7 @@
     <PublisherName>Web Alliance</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>39</ApplicationRevision>
+    <ApplicationRevision>47</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -40,7 +40,7 @@
     <BootstrapperComponentsUrl>http://download.microsoft.com/download/E/1/E/E1E636E6-AA5C-4052-9927-D722312DB564/ProviderServices-v2.1-x64-ENU.msi</BootstrapperComponentsUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -51,7 +51,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -205,9 +205,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-    <BootstrapperPackage Include="Sync.Framework.X86">
+    <BootstrapperPackage Include="Sync.Framework.X64">
       <Visible>False</Visible>
-      <ProductName>Microsoft Sync. Framework %28X86%29</ProductName>
+      <ProductName>Microsoft Sync. Framework %28X64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>

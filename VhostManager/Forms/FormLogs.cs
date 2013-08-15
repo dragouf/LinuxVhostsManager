@@ -136,25 +136,27 @@ namespace VhostManager
                     }
                     catch
                     {
-                        newErrorLog = null;
-                        newAccessLog = null;
-                        newRewriteLog = null;
-                        newGlobalErrorLog = null;
-
-                        this.textBoxError.Text = null;
-                        this.textBoxAcces.Text = null;
-                        this.textBoxRewriteLogs.Text = null;
-                        this.textBoxErrorGlobal.Text = null;
-
-                        // Try clean
-                        System.GC.Collect(0, GCCollectionMode.Forced, true);
-
                         isOK = false;
                     }
                 }
 
-                if(!isOK)
+                if (!isOK)
+                {
+                    newErrorLog = null;
+                    newAccessLog = null;
+                    newRewriteLog = null;
+                    newGlobalErrorLog = null;
+
+                    this.textBoxError.Text = null;
+                    this.textBoxAcces.Text = null;
+                    this.textBoxRewriteLogs.Text = null;
+                    this.textBoxErrorGlobal.Text = null;
+
+                    // Try clean
+                    System.GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+
                     labelUpdateError.Text = "Erreur de conexion...";
+                }
                 else
                     labelUpdateError.Text = string.Empty;
 
