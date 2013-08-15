@@ -1,5 +1,5 @@
-﻿using Renci.SshNet;
-using System;
+﻿using System;
+using Renci.SshNet;
 
 namespace VhostManager
 {
@@ -25,32 +25,73 @@ namespace VhostManager
             }
         }
 
-        public string GetGlobalErrorLog()
+        public string GetGlobalErrorLog(int lineLimit)
         {
-            string command = "tail -n 2000 tail -n 2000 /var/log/apache2/error.log";
+            string command = string.Format("tail -n {0} /var/log/apache2/error.log", lineLimit);
             var resultat = this.ClientConnection.RunCommand(command).Result;
             return resultat.Replace("\n", Environment.NewLine);
         }
 
-        public string GetVhostAccessLog(string vhostName)
+        public string GetVhostAccessLog(string vhostName, int lineLimit)
         {
-            string command = string.Format("tail -n 2000 /var/www/vhosts/{0}/logs/access.log", vhostName);
+            string command = string.Format("tail -n {1} /var/www/vhosts/{0}/logs/access.log", vhostName, lineLimit);
             var resultat = this.ClientConnection.RunCommand(command).Result;
             return resultat.Replace("\n", Environment.NewLine);
         }
 
-        public string GetVhostErrorLog(string vhostName)
+        public string GetVhostErrorLog(string vhostName, int lineLimit)
         {
-            string command = string.Format("tail -n 2000 /var/www/vhosts/{0}/logs/error.log", vhostName);
+            string command = string.Format("tail -n {1} /var/www/vhosts/{0}/logs/error.log", vhostName, lineLimit);
             var resultat = this.ClientConnection.RunCommand(command).Result;
             return resultat.Replace("\n", Environment.NewLine);
         }
 
-        public string GetVhostRewriteLog(string vhostName)
+        public string GetVhostRewriteLog(string vhostName, int lineLimit)
         {
-            string command = string.Format("tail -n 2000 /var/www/vhosts/{0}/logs/rewrite.log", vhostName);
+            string command = string.Format("tail -n {1} /var/www/vhosts/{0}/logs/rewrite.log", vhostName, lineLimit);
             var resultat = this.ClientConnection.RunCommand(command).Result;
             return resultat.Replace("\n", Environment.NewLine);
+        }
+
+        public string GetLoadAverage()
+        {
+            string command = string.Format("cat /proc/loadavg");
+            var resultat = this.ClientConnection.RunCommand(command).Result;
+            return resultat.Substring(0, 15).Replace("\n", Environment.NewLine);
+        }
+
+        public double GetApacheCpuUsage()
+        {
+            double cpuUsage = 0;
+            string command = string.Format("ps auxf |grep apache2 |grep -v grep");
+
+            var resultat = this.ClientConnection.RunCommand(command)
+                .Result.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var ligne in resultat)
+            {
+                var ligneDetails = ligne.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
+                cpuUsage += Convert.ToDouble(ligneDetails[2].Replace(".", ","));
+            }
+
+            return cpuUsage;
+        }
+
+        public double GetMySQLCpuUsage()
+        {
+            double cpuUsage = 0;
+            string command = string.Format("ps auxf |grep mysqld |grep -v grep");
+
+            var resultat = this.ClientConnection.RunCommand(command)
+                .Result.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var ligne in resultat)
+            {
+                var ligneDetails = ligne.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
+                cpuUsage += Convert.ToDouble(ligneDetails[2].Replace(".", ","));
+            }
+
+            return cpuUsage;
         }
 
         public bool TryConnect()
@@ -69,11 +110,11 @@ namespace VhostManager
                     isConnected = false;
                 }
             }
-            else if (this.ClientConnection.IsConnected)
-            {
-                this.ClientConnection.Disconnect();
-                this.ClientConnection.Connect();
-            }
+            //else if (this.ClientConnection.IsConnected)
+            //{
+            //    this.ClientConnection.Disconnect();
+            //    this.ClientConnection.Connect();
+            //}
 
             return isConnected;
         }

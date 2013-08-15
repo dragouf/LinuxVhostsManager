@@ -26,7 +26,7 @@ namespace VhostManager
             this.VhostInfo = vhostDetails;
             this.SSHConnectionInfos = sshInfo;
             this.ConnexionPassword = sshPassword;
-            this.SyncHistory = new List<KeyValuePair<DateTime, string>>();
+            this.SyncHistory = new List<KeyValuePair<DateTime, string>>();            
             StartLoadingIfValid();
 
             // Tooltip bouton de sync.
@@ -35,10 +35,10 @@ namespace VhostManager
             string tipText = "Synchroniser le dossier local avec le vhost...";
             toolTipSync.SetToolTip(this.buttonSync, tipText);
         }
+        
 
         #region Properties
         public delegate void VhostDeletedDelegate();
-
         public event VhostDeletedDelegate VhostDeleted;
 
         public FormMain MainForm { get; set; }
@@ -88,6 +88,7 @@ namespace VhostManager
             {
                 this.buttonSync.Invoke((MethodInvoker)(() =>
                 {
+                    //this.progressBarSync.Visible = value;
                     AnimateSyncButton(value);
                     this.buttonSync.Enabled = !value;
                 }));
@@ -191,7 +192,10 @@ namespace VhostManager
                 }
 
                 if (isLocalValid && isDistantValid)
+                {
                     this.SyncManagerVhost = new SyncManager(this.VhostInfo.CheminLocal, this.SSHConnectionInfos.Host, this.VhostInfo.Nom);
+                    //this.SyncManagerVhost.SessionProgress += SyncManagerVhost_SessionProgress;
+                }
             };
 
             // TERMINE
@@ -439,7 +443,7 @@ namespace VhostManager
         #region Synchronisation
         private void StartSync()
         {
-            this.IsSyncInProgress = true;
+            this.IsSyncInProgress = true;            
             //this.StoptWatchLocalFolder();
             string errorMessage = string.Empty;
 
@@ -524,6 +528,22 @@ namespace VhostManager
             // LANCE
             bw.RunWorkerAsync();
         }
+
+        //void SyncManagerVhost_SessionProgress(object sender, SyncFileEventArg e)
+        //{
+        //    if (e.TotalFiles > e.TotalProcessed)
+        //    {
+        //        int percentageComplete = e.TotalProcessed / e.TotalFiles * 100;
+        //        this.progressBarSync.Invoke((MethodInvoker)(() =>
+        //                 {
+        //                     this.progressBarSync.Step = percentageComplete;
+        //                 }));
+        //    }
+        //    else
+        //    {
+        //        this.progressBarSync.Step = 100;
+        //    }
+        //}
 
         private void CheckSync()
         {

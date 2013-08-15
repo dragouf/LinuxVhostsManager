@@ -5,6 +5,12 @@ using System.Net;
 
 namespace VhostManager
 {
+    //public class SyncFileEventArg : EventArgs
+    //{
+    //    public int TotalProcessed { get; set; }
+    //    public int TotalFiles { get; set; }
+    //}
+
     public class SyncManager : IDisposable
     {
         public SyncManager(string localPath, string shareHost, string vhostDomainName)
@@ -15,6 +21,7 @@ namespace VhostManager
             InitializeSyncAgent();
         }
 
+        #region Properties
         private SyncOrchestrator AgentOrcherstrator { get; set; }
 
         private string LocalPath { get; set; }
@@ -25,39 +32,11 @@ namespace VhostManager
 
         private string UncPath { get; set; }
 
-        public SyncOperationStatistics DetectChanges(string shareUsername, string sharePassword, SyncDirection syncDirection)
-        {
-            return SyncProvider(shareUsername, sharePassword, syncDirection, justStats: true);
-        }
+        //public event EventHandler<SyncFileEventArg> SessionProgress;
 
-        public void Dispose()
-        {
-            if (AgentOrcherstrator != null)
-            {
-                if (AgentOrcherstrator.State != SyncOrchestratorState.Ready &&
-                    AgentOrcherstrator.State != SyncOrchestratorState.Canceled &&
-                    AgentOrcherstrator.State != SyncOrchestratorState.Canceling)
-                {
-                    AgentOrcherstrator.Cancel();
-                }
-            }
-
-            // Release resources
-            if (SourceProvider != null)
-            {
-                SourceProvider.Dispose();
-            }
-
-            if (TargetProvider != null)
-            {
-                TargetProvider.Dispose();
-            }
-        }
-
-        public SyncOperationStatistics Synchronize(string shareUsername, string sharePassword, SyncDirection syncDirection)
-        {
-            return SyncProvider(shareUsername, sharePassword, syncDirection, justStats: false);
-        }
+        //private int TotalProcessed { get; set; }
+        //private int TotalFiles { get; set; }
+        #endregion
 
         private void InitializeSyncAgent()
         {
@@ -71,16 +50,45 @@ namespace VhostManager
             this.SourceProvider = new FileSyncProvider(this.LocalPath, filter, options);
             this.TargetProvider = new FileSyncProvider(this.UncPath, filter, options);
 
+            //this.TargetProvider.ApplyingChange += TargetProvider_ApplyingChange;
+            //this.TargetProvider.SkippedChange += TargetProvider_ApplyingChange;
+
             this.AgentOrcherstrator = new SyncOrchestrator();
             this.AgentOrcherstrator.LocalProvider = SourceProvider;
             this.AgentOrcherstrator.RemoteProvider = TargetProvider;
         }
 
-        private SyncOperationStatistics SyncProvider(string shareUsername, string sharePassword, SyncDirection syncDirection, bool justStats)
+        //void TargetProvider_ApplyingChange(object sender, EventArgs e)
+        //{                   
+        //    this.TotalProcessed++;
+
+        //    var eventArg = new SyncFileEventArg();   
+        //    eventArg.TotalProcessed = this.TotalProcessed;
+        //    eventArg.TotalFiles = this.TotalFiles;
+
+        //    if (this.SessionProgress != null)
+        //        this.SessionProgress(sender, eventArg);
+        //}
+        
+
+        public SyncOperationStatistics DetectChanges(string shareUsername, string sharePassword, SyncDirection syncDirection)
+        {
+            return StartJob(shareUsername, sharePassword, syncDirection, justStats: true);
+        }
+
+        public SyncOperationStatistics Synchronize(string shareUsername, string sharePassword, SyncDirection syncDirection)
+        {
+            return StartJob(shareUsername, sharePassword, syncDirection, justStats: false);
+        }
+
+        
+        private SyncOperationStatistics StartJob(string shareUsername, string sharePassword, SyncDirection syncDirection, bool justStats)
         {
             if (SourceProvider == null || TargetProvider == null || AgentOrcherstrator == null)
                 throw new Exception("La synchronisation n'a pas pu démarrer.");
 
+            //this.TotalProcessed = 0;
+            //this.TotalFiles = CountFileInLocalDir();
             SyncOperationStatistics stats = null;
             var credentials = new NetworkCredential(shareUsername, sharePassword);
 
@@ -128,5 +136,36 @@ namespace VhostManager
                 //}
             }
         }
+
+        //private int CountFileInLocalDir()
+        //{
+        //    System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(this.LocalPath);
+        //    return dir.GetFiles().Length;
+        //}
+
+        public void Dispose()
+        {
+            if (AgentOrcherstrator != null)
+            {
+                if (AgentOrcherstrator.State != SyncOrchestratorState.Ready &&
+                    AgentOrcherstrator.State != SyncOrchestratorState.Canceled &&
+                    AgentOrcherstrator.State != SyncOrchestratorState.Canceling)
+                {
+                    AgentOrcherstrator.Cancel();
+                }
+            }
+
+            // Release resources
+            if (SourceProvider != null)
+            {
+                SourceProvider.Dispose();
+            }
+
+            if (TargetProvider != null)
+            {
+                TargetProvider.Dispose();
+            }
+        }
+
     }
 }

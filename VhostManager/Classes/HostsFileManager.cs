@@ -62,8 +62,6 @@ namespace VhostManager
         public static bool IsHostNameExist(string hostname)
         {
             bool exist = false;
-
-            int counter = 0;
             string line;
 
             // Read the file and display it line by line.
@@ -74,7 +72,6 @@ namespace VhostManager
                 {
                     exist = true;
                 }
-                counter++;
             }
 
             file.Close();
