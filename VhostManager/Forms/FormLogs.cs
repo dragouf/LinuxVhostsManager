@@ -9,17 +9,30 @@ namespace VhostManager
 {
     public partial class FormLogs : Form
     {
+        private StringBuilder NewErrorLog;
+        private StringBuilder NewAccessLog;
+        private StringBuilder NewRewriteLog;
+        private StringBuilder NewGlobalErrorLog;
+        private StringBuilder LoadAverage;
+
         public FormLogs(string nomVhost, ConnectionInfo sshInfos)
         {
             InitializeComponent();
+
+            this.NewErrorLog = new StringBuilder();
+            this.NewAccessLog = new StringBuilder();
+            this.NewRewriteLog = new StringBuilder();
+            this.NewGlobalErrorLog = new StringBuilder();
+            this.LoadAverage = new StringBuilder();
+            
             this.Text = nomVhost + this.Text;
 
-            this.IsRefreshing = false;            
+            this.IsRefreshing = false;
             this.VhostName = nomVhost;
             bool isConnected = false;
             this.Watcher = new LogWatcher(sshInfos, out isConnected);
 
-            InitOnResize();            
+            InitOnResize();
 
             if (isConnected)
             {
@@ -49,6 +62,17 @@ namespace VhostManager
         private void FormLogs_FormClosing(object sender, FormClosingEventArgs e)
         {
             this.Watcher.Dispose();
+
+            this.NewErrorLog.Clear();
+            this.NewAccessLog.Clear();
+            this.NewRewriteLog.Clear();
+            this.NewGlobalErrorLog.Clear();
+            this.LoadAverage.Clear();
+            
+            this.textBoxAcces.Dispose();
+            this.textBoxError.Dispose();
+            this.textBoxErrorGlobal.Dispose();
+            this.textBoxRewriteLogs.Dispose();
         }
 
         private void timerRefresh_Tick(object sender, EventArgs e)
@@ -61,13 +85,7 @@ namespace VhostManager
 
 
         private void RefreshLogsContentAsync()
-        {
-            string newErrorLog = null;
-            string newAccessLog = null;
-            string newRewriteLog = null;
-            string newGlobalErrorLog = null;
-
-            string loadAverage = null;
+        {            
             double mysqlCpu = 0;
             double apacheCpu = 0;
 
@@ -82,12 +100,18 @@ namespace VhostManager
             {
                 try
                 {
-                    newErrorLog = this.Watcher.GetVhostErrorLog(this.VhostName, lineLimit: 1000);
-                    newAccessLog = this.Watcher.GetVhostAccessLog(this.VhostName, lineLimit: 1000);
-                    newRewriteLog = this.Watcher.GetVhostRewriteLog(this.VhostName, lineLimit: 1000);
-                    newGlobalErrorLog = this.Watcher.GetGlobalErrorLog(lineLimit: 1000);
+                    this.NewErrorLog.Clear();
+                    this.NewAccessLog.Clear();
+                    this.NewRewriteLog.Clear();
+                    this.NewGlobalErrorLog.Clear();
+                    this.LoadAverage.Clear();
 
-                    loadAverage = this.Watcher.GetLoadAverage();
+                    NewErrorLog.Append(this.Watcher.GetVhostErrorLog(this.VhostName, lineLimit: 1000));
+                    NewAccessLog.Append(this.Watcher.GetVhostAccessLog(this.VhostName, lineLimit: 1000));
+                    NewRewriteLog.Append(this.Watcher.GetVhostRewriteLog(this.VhostName, lineLimit: 1000));
+                    NewGlobalErrorLog.Append(this.Watcher.GetGlobalErrorLog(lineLimit: 1000));
+
+                    LoadAverage.Append(this.Watcher.GetLoadAverage());
                     mysqlCpu = this.Watcher.GetMySQLCpuUsage();
                     apacheCpu = this.Watcher.GetApacheCpuUsage();
                 }
@@ -113,22 +137,36 @@ namespace VhostManager
                 {
                     try
                     {
-                        this.textBoxError.Text = newErrorLog;
-                        this.textBoxAcces.Text = newAccessLog;
-                        this.textBoxRewriteLogs.Text = newRewriteLog;
-                        this.textBoxErrorGlobal.Text = newGlobalErrorLog;
+                        if (!NewErrorLog.ToString().Equals(this.textBoxError.Text))
+                        {
+                            this.textBoxError.Text = NewErrorLog.ToString();
+                            ScrollDownTextBox(this.textBoxError);
+                        }
 
-                        ScrollDownTextBox(this.textBoxError);
-                        ScrollDownTextBox(this.textBoxAcces);
-                        ScrollDownTextBox(this.textBoxRewriteLogs);
-                        ScrollDownTextBox(this.textBoxErrorGlobal);
+                        if (!NewAccessLog.ToString().Equals(this.textBoxAcces.Text))
+                        {
+                            this.textBoxAcces.Text = NewAccessLog.ToString();
+                            ScrollDownTextBox(this.textBoxAcces);
+                        }
 
-                        var loads = loadAverage.Split(new char[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+                        if (!NewRewriteLog.ToString().Equals(this.textBoxRewriteLogs.Text))
+                        {
+                            this.textBoxRewriteLogs.Text = NewRewriteLog.ToString();
+                            ScrollDownTextBox(this.textBoxRewriteLogs);
+                        }
+
+                        if (!NewGlobalErrorLog.Equals(this.textBoxErrorGlobal.Text))
+                        {
+                            this.textBoxErrorGlobal.Text = NewGlobalErrorLog.ToString();
+                            ScrollDownTextBox(this.textBoxErrorGlobal);
+                        }
+
+                        var loads = LoadAverage.ToString().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         labelLoad1.Text = loads[0];
                         labelLoad2.Text = loads[1];
                         labelLoad3.Text = loads[2];
                         labelApachePourcent.Text = string.Format("{0} %", apacheCpu.ToString("F2"));
-                        labelMysqlPourcent.Text = string.Format("{0} %", mysqlCpu.ToString("F2")); 
+                        labelMysqlPourcent.Text = string.Format("{0} %", mysqlCpu.ToString("F2"));
                         colorProgressBarApache.BrushColor = apacheCpu < 85 ? Brushes.Green : Brushes.Red;
                         colorProgressBarMysql.BrushColor = mysqlCpu < 85 ? Brushes.Green : Brushes.Red;
                         colorProgressBarApache.Value = apacheCpu > 100 ? 100 : (int)apacheCpu;
@@ -142,10 +180,10 @@ namespace VhostManager
 
                 if (!isOK)
                 {
-                    newErrorLog = null;
-                    newAccessLog = null;
-                    newRewriteLog = null;
-                    newGlobalErrorLog = null;
+                    NewErrorLog = null;
+                    NewAccessLog = null;
+                    NewRewriteLog = null;
+                    NewGlobalErrorLog = null;
 
                     this.textBoxError.Text = null;
                     this.textBoxAcces.Text = null;
